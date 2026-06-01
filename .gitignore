@@ -1,3 +1,78 @@
-# Root-level ignores
-package-lock.json
+# ── Node / npm ────────────────────────────────────────────────────────────────
 node_modules/
+package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# ── Build outputs ─────────────────────────────────────────────────────────────
+dist/
+build/
+out/
+.next/
+
+# ── .NET / C# build artifacts (from original project — never commit) ─────────
+[Bb]in/
+[Oo]bj/
+*.dll
+*.pdb
+*.exe
+*.nupkg
+project.lock.json
+project.fragment.lock.json
+*.binlog
+
+# ── Old .NET project folders (not part of SecureVault Pro) ───────────────────
+Extension/
+Interfaces/
+Models/
+Services/
+ViewModels/
+Views/
+PasswordManager.Desktop/
+PasswordManager.WebAPI/
+
+# ── Environment & secrets ─────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# ── Editor ────────────────────────────────────────────────────────────────────
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+.vs/
+*.swp
+*.swo
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# ── TypeScript ────────────────────────────────────────────────────────────────
+*.tsbuildinfo
+
+# ── Testing & coverage ────────────────────────────────────────────────────────
+coverage/
+.nyc_output/
+TestResult.xml
+[Tt]est[Rr]esult*/
+
+# ── Cache ─────────────────────────────────────────────────────────────────────
+.eslintcache
+*.cache
+.sass-cache/
+
+# ── Project-specific ─────────────────────────────────────────────────────────
+securevault-pro/backend/uploads/
+securevault-pro/backend/pgdata/
+securevault-pro/backend/logs/
