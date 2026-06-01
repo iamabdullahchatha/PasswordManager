@@ -1,0 +1,75 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: securevault_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-securevault}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-securevault_secret}
+      POSTGRES_DB: ${DB_NAME:-securevault_pro}
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-securevault}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - securevault_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: securevault_redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - securevault_net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: securevault_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-securevault}:${DB_PASSWORD:-securevault_secret}@postgres:5432/${DB_NAME:-securevault_pro}
+      NODE_ENV: production
+    ports:
+      - '4000:4000'
+    volumes:
+      - uploads_data:/app/uploads
+    networks:
+      - securevault_net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: securevault_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - '80:80'
+    networks:
+      - securevault_net
+
+volumes:
+  postgres_data:
+  redis_data:
+  uploads_data:
+
+networks:
+  securevault_net:
+    driver: bridge
