@@ -90,14 +90,17 @@ api.interceptors.response.use(
 
 export function getErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
-    // Prefer the backend's message, fall back to the HTTP status text
-    return (
-      error.response?.data?.message ||
-      error.response?.data?.error ||
-      error.message ||
-      'An unexpected error occurred'
-    );
+    const data = error.response?.data;
+    // Strictly only accept strings — Vercel/proxies can return {code,message} objects
+    // which would throw React Error #31 if rendered directly in JSX.
+    const fromData =
+      (typeof data?.message === 'string' ? data.message : null) ??
+      (typeof data?.error   === 'string' ? data.error   : null) ??
+      (typeof data?.detail  === 'string' ? data.detail  : null);
+
+    return fromData ?? error.message ?? 'An unexpected error occurred';
   }
   if (error instanceof Error) return error.message;
-  return String(error);
+  if (typeof error === 'string') return error;
+  return 'An unexpected error occurred';
 }

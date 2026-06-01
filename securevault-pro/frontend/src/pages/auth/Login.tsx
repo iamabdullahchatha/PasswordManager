@@ -68,6 +68,7 @@ export default function LoginPage() {
         <AnimatePresence>
           {isInactivity && (
             <motion.div
+              key="inactivity-banner"
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
@@ -165,6 +166,7 @@ export default function LoginPage() {
           <AnimatePresence>
             {error && (
               <motion.div
+                key="error-banner"
                 initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
@@ -173,7 +175,7 @@ export default function LoginPage() {
                 <div className="w-7 h-7 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
                   <AlertTriangle size={14} className="text-red-600" />
                 </div>
-                <p className="text-sm text-red-700">{error}</p>
+                <p className="text-sm text-red-700">{String(error)}</p>
               </motion.div>
             )}
           </AnimatePresence>

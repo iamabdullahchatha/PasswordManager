@@ -24,15 +24,15 @@ project.lock.json
 project.fragment.lock.json
 *.binlog
 
-# ── Old .NET project folders (not part of SecureVault Pro) ───────────────────
-Extension/
-Interfaces/
-Models/
-Services/
-ViewModels/
-Views/
-PasswordManager.Desktop/
-PasswordManager.WebAPI/
+# ── Old .NET project folders (root-level only — not part of SecureVault Pro) ──
+/Extension/
+/Interfaces/
+/Models/
+/Services/
+/ViewModels/
+/Views/
+/PasswordManager.Desktop/
+/PasswordManager.WebAPI/
 
 # ── Environment & secrets ─────────────────────────────────────────────────────
 .env

@@ -1,4 +1,31 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate, useRouteError } from 'react-router-dom';
+
+function RouteErrorBoundary() {
+  const err = useRouteError() as any;
+  const msg =
+    typeof err?.message    === 'string' ? err.message    :
+    typeof err?.statusText === 'string' ? err.statusText :
+    'An unexpected error occurred.';
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6">
+      <div className="bg-white rounded-2xl border border-red-100 shadow-lg p-10 max-w-md w-full text-center">
+        <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-5 text-3xl select-none">⚠️</div>
+        <h1 className="text-xl font-bold text-slate-900 mb-2">Something went wrong</h1>
+        <p className="text-sm text-slate-500 mb-6">{msg}</p>
+        <div className="flex gap-3 justify-center">
+          <button onClick={() => window.location.reload()}
+            className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors">
+            Refresh page
+          </button>
+          <button onClick={() => { window.location.href = '/login'; }}
+            className="px-5 py-2.5 border border-slate-200 text-slate-700 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-colors">
+            Back to login
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 import { Layout } from '../components/layout/Layout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleRoute } from './RoleRoute';
@@ -41,12 +68,13 @@ import SecuritySettingsPage from '../pages/settings/SecuritySettings';
 import ActivityLogsPage from '../pages/ActivityLogsPage';
 
 export const router = createBrowserRouter([
-  { path: '/login',           element: <LoginPage /> },
-  { path: '/register',        element: <RegisterPage /> },
-  { path: '/forgot-password', element: <ForgotPasswordPage /> },
-  { path: '/reset-password',  element: <ResetPasswordPage /> },
+  { path: '/login',           element: <LoginPage />,          errorElement: <RouteErrorBoundary /> },
+  { path: '/register',        element: <RegisterPage />,       errorElement: <RouteErrorBoundary /> },
+  { path: '/forgot-password', element: <ForgotPasswordPage />, errorElement: <RouteErrorBoundary /> },
+  { path: '/reset-password',  element: <ResetPasswordPage />,  errorElement: <RouteErrorBoundary /> },
   {
     path: '/',
+    errorElement: <RouteErrorBoundary />,
     element: (
       <ProtectedRoute>
         <Layout />
