@@ -1,0 +1,9 @@
+{
+  "buildCommand": "cd securevault-pro/frontend && npm install && npm run build",
+  "outputDirectory": "securevault-pro/frontend/dist",
+  "installCommand": "echo 'Dependencies installed inside buildCommand'",
+  "framework": null,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
