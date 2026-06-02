@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Search, Bell, Settings, LogOut, User, Shield,
-  ChevronDown, Menu, X, Key, DollarSign, Activity,
+  Search, Bell, LogOut, User, Shield,
+  ChevronDown, ChevronLeft, Menu, X, Activity,
   CheckCircle, AlertTriangle, Clock,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
@@ -22,6 +22,38 @@ const NOTIFICATIONS = [
   { id: 3, type: 'success', title: 'Backup completed', body: 'All data securely backed up', time: '3h ago', read: true },
 ];
 
+// ─── Mobile page-title map ────────────────────────────────────────────────────
+// Provides a human-readable title for the mobile header on every route.
+const PAGE_TITLES: Record<string, string> = {
+  '/dashboard':          'Dashboard',
+  '/vault':              'Password Vault',
+  '/vault/new':          'Add Entry',
+  '/vault/security':     'Security Report',
+  '/password-generator': 'Generator',
+  '/expenses':           'Expenses',
+  '/expenses/new':       'Add Expense',
+  '/expenses/monthly':   'Monthly View',
+  '/expenses/yearly':    'Yearly View',
+  '/expenses/budgets':   'Budgets',
+  '/reports':            'Reports',
+  '/users':              'Users',
+  '/users/new':          'Add User',
+  '/settings/profile':   'Profile',
+  '/settings/security':  'Security',
+  '/activity-logs':      'Activity Logs',
+};
+
+function getPageTitle(pathname: string): string {
+  if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
+  // Dynamic routes
+  if (/^\/vault\/[^/]+\/edit$/.test(pathname)) return 'Edit Entry';
+  if (/^\/vault\/[^/]+$/.test(pathname))       return 'Entry Details';
+  if (/^\/expenses\/[^/]+\/edit$/.test(pathname)) return 'Edit Expense';
+  // Fallback: humanise the last path segment
+  const last = pathname.split('/').filter(Boolean).pop() ?? '';
+  return last.charAt(0).toUpperCase() + last.slice(1).replace(/-/g, ' ');
+}
+
 export function Header({ onMobileMenuToggle, sidebarCollapsed }: HeaderProps) {
   const { user, refreshToken, logout } = useAuthStore();
   const navigate = useNavigate();
@@ -34,6 +66,11 @@ export function Header({ onMobileMenuToggle, sidebarCollapsed }: HeaderProps) {
   const debouncedSearch = useDebounce(search, 400);
 
   const unreadCount = NOTIFICATIONS.filter((n) => !n.read).length;
+
+  // Show a back button on every page except the home dashboard
+  const showBack = location.pathname !== '/dashboard';
+
+  const handleBack = () => navigate(-1);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -61,23 +98,46 @@ export function Header({ onMobileMenuToggle, sidebarCollapsed }: HeaderProps) {
     }
   };
 
-  // Build breadcrumb
+  // Desktop breadcrumb
   const pathParts = location.pathname.split('/').filter(Boolean);
   const breadcrumb = pathParts.map((p) => p.charAt(0).toUpperCase() + p.slice(1).replace(/-/g, ' '));
 
   return (
-    <header className="h-16 bg-white dark:bg-[hsl(222_47%_10%)] border-b border-slate-200 dark:border-[hsl(222_40%_16%)] flex items-center gap-2 px-4 lg:px-6 flex-shrink-0 z-30 sticky top-0"
-      style={{ boxShadow: '0 1px 0 hsl(214 32% 91%), 0 2px 8px rgba(0,0,0,0.03)' }}>
+    <header
+      className="h-16 bg-white dark:bg-[hsl(222_47%_10%)] border-b border-slate-200 dark:border-[hsl(222_40%_16%)] flex items-center gap-2 px-4 lg:px-6 flex-shrink-0 z-30 sticky top-0"
+      style={{ boxShadow: '0 1px 0 hsl(214 32% 91%), 0 2px 8px rgba(0,0,0,0.03)' }}
+    >
 
-      {/* Mobile menu toggle */}
+      {/* ── Mobile hamburger ──────────────────────────────────────────────── */}
       <button
         onClick={onMobileMenuToggle}
-        className="lg:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors text-slate-500"
+        aria-label="Open navigation menu"
+        className="lg:hidden flex-shrink-0 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-slate-500 dark:text-slate-400"
       >
         <Menu size={18} />
       </button>
 
-      {/* Breadcrumb (desktop) */}
+      {/* ── Mobile: back button + page title ─────────────────────────────── */}
+      {/* Fills the space between the hamburger and the action icons.
+          Shown on mobile only (lg:hidden).  The back button appears on every
+          page except the dashboard so the user always has a one-tap way to
+          return to the previous screen. */}
+      <div className="lg:hidden flex items-center flex-1 min-w-0">
+        {showBack && (
+          <button
+            onClick={handleBack}
+            aria-label="Go back"
+            className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white mr-1"
+          >
+            <ChevronLeft size={20} />
+          </button>
+        )}
+        <h1 className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+          {getPageTitle(location.pathname)}
+        </h1>
+      </div>
+
+      {/* ── Desktop breadcrumb ────────────────────────────────────────────── */}
       <div className="hidden lg:flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400 min-w-0">
         {breadcrumb.length === 0 ? (
           <span className="font-semibold text-slate-900 dark:text-white">Dashboard</span>
@@ -95,9 +155,10 @@ export function Header({ onMobileMenuToggle, sidebarCollapsed }: HeaderProps) {
         )}
       </div>
 
-      <div className="flex-1" />
+      {/* Desktop spacer */}
+      <div className="hidden lg:flex flex-1" />
 
-      {/* Search — Desktop */}
+      {/* ── Desktop search ────────────────────────────────────────────────── */}
       <form onSubmit={handleSearch} className="hidden md:flex items-center relative">
         <div className={cn(
           'flex items-center gap-2 px-3 py-2 rounded-xl border bg-white transition-all duration-200 shadow-sm',
@@ -124,17 +185,18 @@ export function Header({ onMobileMenuToggle, sidebarCollapsed }: HeaderProps) {
         </div>
       </form>
 
-      {/* Actions */}
+      {/* ── Action icons ──────────────────────────────────────────────────── */}
       <div className="flex items-center gap-1">
+
         {/* Notifications */}
         <div className="relative" onMouseDown={(e) => e.stopPropagation()}>
           <button
             onClick={() => { setNotifOpen((p) => !p); setProfileOpen(false); }}
-            className="relative p-2 rounded-lg hover:bg-slate-100 transition-colors text-slate-500 hover:text-slate-700"
+            className="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white"
           >
             <Bell size={18} />
             {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-600 rounded-full ring-2 ring-white" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-600 rounded-full ring-2 ring-white dark:ring-[hsl(222_47%_10%)]" />
             )}
           </button>
 
@@ -198,7 +260,7 @@ export function Header({ onMobileMenuToggle, sidebarCollapsed }: HeaderProps) {
         <div className="relative" onMouseDown={(e) => e.stopPropagation()}>
           <button
             onClick={() => { setProfileOpen((p) => !p); setNotifOpen(false); }}
-            className="flex items-center gap-2 pl-2 pr-1 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+            className="flex items-center gap-2 pl-2 pr-1 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
           >
             <div className="w-7 h-7 rounded-lg overflow-hidden flex-shrink-0">
               {user?.avatar ? (
