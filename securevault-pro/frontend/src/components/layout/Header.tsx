@@ -87,11 +87,15 @@ export function Header({ onMobileMenuToggle, sidebarCollapsed }: HeaderProps) {
 
   const handleBack = () => navigate(-1);
 
-  // Close dropdowns on outside click
+  // Close dropdowns on outside click/tap — mousedown for desktop, touchstart for mobile
   useEffect(() => {
     const close = () => { setNotifOpen(false); setProfileOpen(false); };
     document.addEventListener('mousedown', close);
-    return () => document.removeEventListener('mousedown', close);
+    document.addEventListener('touchstart', close, { passive: true });
+    return () => {
+      document.removeEventListener('mousedown', close);
+      document.removeEventListener('touchstart', close);
+    };
   }, []);
 
   // Close dropdowns on navigation (e.g. back button or programmatic navigate)
@@ -204,7 +208,11 @@ export function Header({ onMobileMenuToggle, sidebarCollapsed }: HeaderProps) {
       <div className="flex items-center gap-1">
 
         {/* Notifications */}
-        <div className="relative" onMouseDown={(e) => e.stopPropagation()}>
+        <div
+          className="relative"
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+        >
           <button
             onClick={() => { setNotifOpen((p) => !p); setProfileOpen(false); }}
             className="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white"
@@ -218,11 +226,11 @@ export function Header({ onMobileMenuToggle, sidebarCollapsed }: HeaderProps) {
           <AnimatePresence>
             {notifOpen && (
               <motion.div
-                initial={{ opacity: 0, y: -8, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.15 }}
-                className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl border border-slate-100 shadow-xl z-modal overflow-hidden"
+                className="fixed right-2 top-[4.25rem] w-[calc(100vw-1rem)] sm:absolute sm:right-0 sm:top-full sm:mt-2 sm:w-80 bg-white rounded-xl border border-slate-100 shadow-xl z-modal"
               >
                 <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -283,7 +291,11 @@ export function Header({ onMobileMenuToggle, sidebarCollapsed }: HeaderProps) {
         </div>
 
         {/* Profile dropdown */}
-        <div className="relative" onMouseDown={(e) => e.stopPropagation()}>
+        <div
+          className="relative"
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+        >
           <button
             onClick={() => { setProfileOpen((p) => !p); setNotifOpen(false); }}
             className="flex items-center gap-2 pl-2 pr-1 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
@@ -307,11 +319,11 @@ export function Header({ onMobileMenuToggle, sidebarCollapsed }: HeaderProps) {
           <AnimatePresence>
             {profileOpen && (
               <motion.div
-                initial={{ opacity: 0, y: -8, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.15 }}
-                className="absolute right-0 top-full mt-2 w-60 bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)] z-modal overflow-hidden"
+                className="fixed right-2 top-[4.25rem] w-[calc(100vw-1rem)] sm:absolute sm:right-0 sm:top-full sm:mt-2 sm:w-60 bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)] z-modal"
               >
                 {/* User info header */}
                 <div className="px-4 py-3.5 border-b border-slate-100">
