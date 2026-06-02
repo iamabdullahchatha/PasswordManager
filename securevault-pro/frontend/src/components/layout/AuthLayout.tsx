@@ -26,10 +26,13 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         {/* Background pattern */}
         <div className="absolute inset-0 pattern-grid opacity-30" />
 
-        {/* Glow orbs */}
-        <div className="absolute top-1/4 left-10 w-72 h-72 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-1/4 right-10 w-56 h-56 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-3/4 left-1/2 w-48 h-48 bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
+        {/* Glow orbs — radial-gradient instead of blur() to avoid Android GPU artifacts */}
+        <div className="absolute top-1/4 left-10 w-72 h-72 rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(37,99,235,0.18) 0%, transparent 65%)' }} />
+        <div className="absolute bottom-1/4 right-10 w-56 h-56 rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 65%)' }} />
+        <div className="absolute top-3/4 left-1/2 w-48 h-48 rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.10) 0%, transparent 65%)' }} />
 
         <div className="relative flex flex-col h-full px-12 py-10">
           {/* Logo */}
