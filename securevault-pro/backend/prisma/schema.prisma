@@ -98,6 +98,7 @@ enum ExpenseStatus {
 }
 
 enum EmailProvider {
+  // ── Email providers ──────────────────────────────────────────────────────
   GMAIL
   OUTLOOK
   YAHOO
@@ -106,6 +107,35 @@ enum EmailProvider {
   PROTONMAIL
   FASTMAIL
   BUSINESS
+  // ── Social media ─────────────────────────────────────────────────────────
+  FACEBOOK
+  INSTAGRAM
+  WHATSAPP
+  SNAPCHAT
+  TWITTER
+  TIKTOK
+  YOUTUBE
+  LINKEDIN
+  DISCORD
+  TELEGRAM
+  REDDIT
+  PINTEREST
+  TWITCH
+  // ── Finance & crypto ─────────────────────────────────────────────────────
+  BINANCE
+  PAYPAL
+  COINBASE
+  // ── Tech & services ──────────────────────────────────────────────────────
+  GITHUB
+  GOOGLE
+  APPLE
+  MICROSOFT
+  AMAZON
+  NETFLIX
+  SPOTIFY
+  SHOPIFY
+  STEAM
+  // ── Other ────────────────────────────────────────────────────────────────
   CUSTOM
 }
 

@@ -28,9 +28,17 @@ export interface AuthTokens {
 // ─── Vault ────────────────────────────────────────────────────────────────────
 
 export type EmailProvider =
-  | 'GMAIL' | 'OUTLOOK' | 'YAHOO' | 'ZOHO'
-  | 'ICLOUD' | 'PROTONMAIL' | 'FASTMAIL'
-  | 'BUSINESS' | 'CUSTOM';
+  // Email
+  | 'GMAIL' | 'OUTLOOK' | 'YAHOO' | 'ZOHO' | 'ICLOUD' | 'PROTONMAIL' | 'FASTMAIL' | 'BUSINESS'
+  // Social media
+  | 'FACEBOOK' | 'INSTAGRAM' | 'WHATSAPP' | 'SNAPCHAT' | 'TWITTER' | 'TIKTOK'
+  | 'YOUTUBE' | 'LINKEDIN' | 'DISCORD' | 'TELEGRAM' | 'REDDIT' | 'PINTEREST' | 'TWITCH'
+  // Finance & crypto
+  | 'BINANCE' | 'PAYPAL' | 'COINBASE'
+  // Tech & services
+  | 'GITHUB' | 'GOOGLE' | 'APPLE' | 'MICROSOFT' | 'AMAZON' | 'NETFLIX' | 'SPOTIFY' | 'SHOPIFY' | 'STEAM'
+  // Other
+  | 'CUSTOM';
 
 export type ImportanceLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 

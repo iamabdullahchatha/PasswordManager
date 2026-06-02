@@ -1,6 +1,18 @@
 import { z } from 'zod';
 
-const PROVIDERS  = ['GMAIL','OUTLOOK','YAHOO','ZOHO','ICLOUD','PROTONMAIL','FASTMAIL','BUSINESS','CUSTOM'] as const;
+const PROVIDERS  = [
+  // Email
+  'GMAIL','OUTLOOK','YAHOO','ZOHO','ICLOUD','PROTONMAIL','FASTMAIL','BUSINESS',
+  // Social media
+  'FACEBOOK','INSTAGRAM','WHATSAPP','SNAPCHAT','TWITTER','TIKTOK','YOUTUBE',
+  'LINKEDIN','DISCORD','TELEGRAM','REDDIT','PINTEREST','TWITCH',
+  // Finance & crypto
+  'BINANCE','PAYPAL','COINBASE',
+  // Tech & services
+  'GITHUB','GOOGLE','APPLE','MICROSOFT','AMAZON','NETFLIX','SPOTIFY','SHOPIFY','STEAM',
+  // Other
+  'CUSTOM',
+] as const;
 const IMPORTANCE = ['LOW','MEDIUM','HIGH','CRITICAL'] as const;
 
 /* ── List / filter ───────────────────────────────────────────────────────── */

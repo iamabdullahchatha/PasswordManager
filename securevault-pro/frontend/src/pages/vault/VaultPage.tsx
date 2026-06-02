@@ -59,7 +59,14 @@ const IMP_CFG: Record<ImportanceLevel, { variant: 'destructive' | 'warning' | 'd
 const GRADS = ['from-blue-500 to-blue-600','from-violet-500 to-violet-600','from-emerald-500 to-emerald-600','from-orange-500 to-orange-600','from-pink-500 to-pink-600','from-cyan-500 to-cyan-600','from-indigo-500 to-indigo-600','from-teal-500 to-teal-600'];
 const grad  = (s: string) => GRADS[s.charCodeAt(0) % GRADS.length];
 
-const ALL_PROVIDERS: EmailProvider[] = ['GMAIL','OUTLOOK','YAHOO','ZOHO','ICLOUD','PROTONMAIL','FASTMAIL','BUSINESS','CUSTOM'];
+const ALL_PROVIDERS: EmailProvider[] = [
+  'GMAIL','OUTLOOK','YAHOO','ZOHO','ICLOUD','PROTONMAIL','FASTMAIL','BUSINESS',
+  'FACEBOOK','INSTAGRAM','WHATSAPP','SNAPCHAT','TWITTER','TIKTOK','YOUTUBE',
+  'LINKEDIN','DISCORD','TELEGRAM','REDDIT','PINTEREST','TWITCH',
+  'BINANCE','PAYPAL','COINBASE',
+  'GITHUB','GOOGLE','APPLE','MICROSOFT','AMAZON','NETFLIX','SPOTIFY','SHOPIFY','STEAM',
+  'CUSTOM',
+];
 const ALL_IMPORTANCE: ImportanceLevel[] = ['CRITICAL','HIGH','MEDIUM','LOW'];
 
 export default function VaultPage() {

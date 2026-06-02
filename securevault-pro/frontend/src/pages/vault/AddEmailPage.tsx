@@ -18,11 +18,11 @@ import { vaultService } from '../../services/vault.service';
 import { toast } from '../../hooks/useToast';
 import { getErrorMessage } from '../../services/api';
 import { generatePassword } from '../../utils/password';
-import { PROVIDER_LABELS } from '../../components/vault/ProviderIcon';
+import { PROVIDER_LABELS, PROVIDER_GROUPS } from '../../components/vault/ProviderIcon';
 import { cn } from '../../utils/cn';
 import type { EmailProvider, ImportanceLevel } from '../../types';
 
-const PROVIDERS: EmailProvider[] = ['GMAIL','OUTLOOK','YAHOO','ZOHO','ICLOUD','PROTONMAIL','FASTMAIL','BUSINESS','CUSTOM'];
+// PROVIDER_GROUPS imported from ProviderIcon — grouped for the dropdown
 const IMPORTANCE_OPTS: { value: ImportanceLevel; label: string; desc: string }[] = [
   { value: 'LOW',      label: 'Low',      desc: 'Personal / secondary accounts'         },
   { value: 'MEDIUM',   label: 'Medium',   desc: 'Regularly used accounts'               },
@@ -33,9 +33,16 @@ const IMPORTANCE_OPTS: { value: ImportanceLevel; label: string; desc: string }[]
 const schema = z.object({
   title:           z.string().min(1,'Title is required').max(100),
   platformName:    z.string().min(1).max(100),
-  provider:        z.enum(['GMAIL','OUTLOOK','YAHOO','ZOHO','ICLOUD','PROTONMAIL','FASTMAIL','BUSINESS','CUSTOM']).default('CUSTOM'),
+  provider:        z.enum([
+    'GMAIL','OUTLOOK','YAHOO','ZOHO','ICLOUD','PROTONMAIL','FASTMAIL','BUSINESS',
+    'FACEBOOK','INSTAGRAM','WHATSAPP','SNAPCHAT','TWITTER','TIKTOK','YOUTUBE',
+    'LINKEDIN','DISCORD','TELEGRAM','REDDIT','PINTEREST','TWITCH',
+    'BINANCE','PAYPAL','COINBASE',
+    'GITHUB','GOOGLE','APPLE','MICROSOFT','AMAZON','NETFLIX','SPOTIFY','SHOPIFY','STEAM',
+    'CUSTOM',
+  ]).default('CUSTOM'),
   platformUrl:     z.string().url('Invalid URL').optional().or(z.literal('')),
-  emailAddress:    z.string().min(1,'Email / username is required'),
+  emailAddress:    z.string().min(1,'Email, phone, or username is required'),
   username:        z.string().max(100).optional(),
   password:        z.string().min(1,'Password is required'),
   notes:           z.string().max(10000).optional(),
@@ -215,10 +222,14 @@ export default function AddEmailPage() {
               </Field>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Field label="Email Provider" error={errors.provider?.message}>
+                <Field label="Platform / Provider" error={errors.provider?.message}>
                   <select className={selectCls} {...register('provider')}>
-                    {PROVIDERS.map((p) => (
-                      <option key={p} value={p}>{PROVIDER_LABELS[p]}</option>
+                    {PROVIDER_GROUPS.map((group) => (
+                      <optgroup key={group.label} label={group.label}>
+                        {group.providers.map((p) => (
+                          <option key={p} value={p}>{PROVIDER_LABELS[p]}</option>
+                        ))}
+                      </optgroup>
                     ))}
                   </select>
                 </Field>
@@ -276,14 +287,14 @@ export default function AddEmailPage() {
 
             {/* ── Credentials ──────────────────────────────────────────── */}
             <Section title="Credentials" icon={Lock}>
-              <Field label="Email Address / Username" error={errors.emailAddress?.message} required>
+              <Field label="Email / Phone / Username" error={errors.emailAddress?.message} required hint="Enter an email, phone number, or @username">
                 <div className="relative">
-                  <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                  <input placeholder="you@gmail.com" className={`${iCls} pl-9`} {...register('emailAddress')} />
+                  <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  <input placeholder="email, +1 555 0100, or @username" className={`${iCls} pl-9`} {...register('emailAddress')} />
                 </div>
               </Field>
 
-              <Field label="Username" hint="If different from the email address">
+              <Field label="Display Username" hint="Optional — if different from the identifier above">
                 <input placeholder="john_doe" className={iCls} {...register('username')} />
               </Field>
 
