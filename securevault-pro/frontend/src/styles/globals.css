@@ -106,12 +106,23 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Removes the 300 ms tap delay on mobile without disabling pinch-zoom */
+    touch-action: manipulation;
   }
 
   body {
     @apply bg-background text-foreground font-sans;
     font-size: 14px;
     line-height: 1.6;
+    /* Prevent body-level bounce scroll on iOS — actual scrolling happens
+       inside the <main> overflow-y-auto container, not on the body itself */
+    overscroll-behavior: none;
+  }
+
+  /* Remove the blue tap-highlight flash on iOS/Android for all interactive
+     elements — the app uses its own focus/active styles */
+  *, *::before, *::after {
+    -webkit-tap-highlight-color: transparent;
   }
 
   /* ── Autofill reset (inputs are inside white cards in both modes) ── */
