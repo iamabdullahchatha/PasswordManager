@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import {
   Shield, Globe, Mail, Tag, RefreshCw, Key, Lock, Phone,
   Star, ShieldCheck, AlertTriangle, ChevronDown, ChevronUp,
-  Hash, HelpCircle, Smartphone,
+  Hash, HelpCircle, Smartphone, Eye, EyeOff,
 } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Button } from '../../components/ui/Button';
@@ -297,7 +297,7 @@ export default function AddEmailPage() {
                       {...register('password')}
                     />
                     <button type="button" onClick={() => setShowPwd((p) => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                      <Key size={14} />
+                      {showPwd ? <EyeOff size={14} /> : <Eye size={14} />}
                     </button>
                   </div>
                   <button

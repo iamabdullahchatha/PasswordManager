@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Plus, Search, Star, StarOff, Shield, Eye, Trash2, Edit,
+  Plus, Search, Star, StarOff, Shield, Eye, EyeOff, Trash2, Edit,
   ExternalLink, Key, Clock, AlertTriangle, X, LayoutGrid, List,
   Filter, SlidersHorizontal, Archive, ArchiveX, ChevronDown,
   TrendingDown, RefreshCw, ShieldAlert, CheckCircle2,
@@ -602,7 +602,7 @@ export default function VaultPage() {
               className="w-full px-3 py-2.5 pr-10 rounded-xl border border-slate-200 bg-white text-sm font-mono placeholder:font-sans placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
             />
             <button type="button" onClick={() => setShowMasterPwd((p) => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
-              {showMasterPwd ? <Eye size={14} /> : <Eye size={14} />}
+              {showMasterPwd ? <EyeOff size={14} /> : <Eye size={14} />}
             </button>
           </div>
           {revealError && <p className="text-xs text-red-600">{revealError}</p>}
@@ -629,7 +629,7 @@ export default function VaultPage() {
                 <div className="flex items-center justify-between mb-1.5">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Password</p>
                   <button onClick={() => setShowPwd((p) => !p)} className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1">
-                    {showPwd ? <><Eye size={11} /> Hide</> : <><Eye size={11} /> Show</>}
+                    {showPwd ? <><EyeOff size={11} /> Hide</> : <><Eye size={11} /> Show</>}
                   </button>
                 </div>
                 <div className="flex items-center gap-2">
