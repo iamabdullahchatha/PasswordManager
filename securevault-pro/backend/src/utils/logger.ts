@@ -28,10 +28,13 @@ export const logger = winston.createLogger({
   ],
 });
 
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(
-    new winston.transports.Console({
-      format: combine(colorize(), simple()),
-    }),
-  );
-}
+// Always log to stdout — hosting platforms (Railway, Render, Docker, etc.)
+// capture stdout/stderr, not files. In production use structured JSON;
+// in development use a colorized, human-readable format.
+logger.add(
+  new winston.transports.Console({
+    format: process.env.NODE_ENV === 'production'
+      ? combine(timestamp(), json())
+      : combine(colorize(), simple()),
+  }),
+);

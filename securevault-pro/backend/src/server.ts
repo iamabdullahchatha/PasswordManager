@@ -16,7 +16,10 @@ async function bootstrap(): Promise<void> {
 
     const app = createApp();
 
-    const server = app.listen(PORT, () => {
+    // Bind to 0.0.0.0 so the container is reachable on hosting platforms (Railway, etc.)
+    const server = app.listen(PORT, '0.0.0.0', () => {
+      // Plain console.log guarantees visibility in platform logs (stdout)
+      console.log(`Server running on port ${PORT}`);
       logger.info(`SecureVault Pro API running on port ${PORT} [${process.env.NODE_ENV}]`);
     });
 
