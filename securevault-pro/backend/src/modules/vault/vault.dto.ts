@@ -66,6 +66,12 @@ export const revealPasswordSchema = z.object({
     .default('password'),
 });
 
+/* ── Delete (requires master password confirmation) ─────────────────────── */
+
+export const deleteVaultEntrySchema = z.object({
+  masterPassword: z.string().min(1, 'Master password required'),
+});
+
 /* ── Export / Import ─────────────────────────────────────────────────────── */
 
 export const exportVaultSchema = z.object({
@@ -83,3 +89,4 @@ export type CreateVaultEntryInput = z.infer<typeof createVaultEntrySchema>;
 export type UpdateVaultEntryInput = z.infer<typeof updateVaultEntrySchema>;
 export type ListVaultQuery         = z.infer<typeof listVaultQuerySchema>;
 export type RevealInput            = z.infer<typeof revealPasswordSchema>;
+export type DeleteVaultEntryInput  = z.infer<typeof deleteVaultEntrySchema>;

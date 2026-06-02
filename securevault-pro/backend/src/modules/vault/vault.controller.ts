@@ -8,6 +8,7 @@ import type {
   UpdateVaultEntryInput,
   RevealInput,
   ListVaultQuery,
+  DeleteVaultEntryInput,
 } from './vault.dto';
 
 export class VaultController {
@@ -45,7 +46,8 @@ export class VaultController {
 
   async delete(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      await vaultService.deleteEntry(req.params.id, req.user.id, req.ip);
+      const { masterPassword } = req.body as DeleteVaultEntryInput;
+      await vaultService.deleteEntry(req.params.id, req.user.id, masterPassword, req.ip);
       sendSuccess(res, null, 'Vault entry deleted');
     } catch (e) { next(e); }
   }

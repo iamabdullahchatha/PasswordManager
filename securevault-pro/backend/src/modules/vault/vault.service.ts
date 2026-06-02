@@ -440,7 +440,12 @@ export class VaultService {
 
   /* ── DELETE ──────────────────────────────────────────────────────────── */
 
-  async deleteEntry(id: string, userId: string, ipAddress?: string) {
+  async deleteEntry(id: string, userId: string, masterPassword: string, ipAddress?: string) {
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { masterPasswordHash: true } });
+    if (!user?.masterPasswordHash) throw new AppError('Master password not set. Please configure it in Security Settings.', 400, 'MASTER_PASSWORD_NOT_SET');
+    const isValid = await comparePassword(masterPassword, user.masterPasswordHash);
+    if (!isValid) throw new AppError('Incorrect master password', 401, 'INVALID_MASTER_PASSWORD');
+
     await this.getEntry(id, userId);
     await prisma.vaultEntry.delete({ where: { id } });
     await createActivityLog({ userId, action: 'VAULT_DELETE', resource: 'VaultEntry', resourceId: id, ipAddress });

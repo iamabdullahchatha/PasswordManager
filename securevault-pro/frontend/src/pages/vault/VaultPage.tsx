@@ -12,7 +12,7 @@ import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { PageLoader } from '../../components/ui/LoadingSpinner';
-import { Modal, ConfirmDialog } from '../../components/ui/Modal';
+import { Modal } from '../../components/ui/Modal';
 import { CopyButton } from '../../components/ui/CopyButton';
 import { vaultService, type VaultListParams } from '../../services/vault.service';
 import { useDebounce } from '../../hooks/useDebounce';
@@ -94,8 +94,12 @@ export default function VaultPage() {
   const [revealError,    setRevealError]    = useState('');
   const [viewModal,      setViewModal]      = useState(false);
 
-  // Delete
-  const [deleteTarget, setDeleteTarget] = useState<VaultEntry | null>(null);
+  // Delete with master password
+  const [deleteTarget,     setDeleteTarget]     = useState<VaultEntry | null>(null);
+  const [deleteMasterPwd,  setDeleteMasterPwd]  = useState('');
+  const [showDeletePwd,    setShowDeletePwd]    = useState(false);
+  const [deleteError,      setDeleteError]      = useState('');
+  const [deleteLoading,    setDeleteLoading]    = useState(false);
 
   /* ── Fetch ─────────────────────────────────────────────────────────── */
   const fetchEntries = useCallback(async () => {
@@ -155,14 +159,25 @@ export default function VaultPage() {
     finally { setRevealLoading(false); }
   };
 
+  const closeDeleteModal = () => {
+    setDeleteTarget(null);
+    setDeleteMasterPwd('');
+    setShowDeletePwd(false);
+    setDeleteError('');
+  };
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
+    if (!deleteMasterPwd.trim()) { setDeleteError('Enter your master password'); return; }
+    setDeleteLoading(true); setDeleteError('');
     try {
-      await vaultService.delete(deleteTarget.id);
+      await vaultService.delete(deleteTarget.id, deleteMasterPwd);
       setEntries((p) => p.filter((e) => e.id !== deleteTarget.id));
-      setDeleteTarget(null);
+      closeDeleteModal();
       toast('Entry deleted', 'success');
-    } catch (err) { toast(getErrorMessage(err), 'error'); }
+    } catch (err) {
+      setDeleteError(getErrorMessage(err));
+    } finally { setDeleteLoading(false); }
   };
 
   /* ── Derived ───────────────────────────────────────────────────────── */
@@ -645,17 +660,54 @@ export default function VaultPage() {
         )}
       </Modal>
 
-      {/* ── Delete confirm ──────────────────────────────────────────── */}
-      <ConfirmDialog
+      {/* ── Delete with master password ─────────────────────────────── */}
+      <Modal
         open={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
-        onConfirm={handleDelete}
+        onClose={closeDeleteModal}
         title="Delete Entry"
-        description={`Permanently delete "${deleteTarget?.title}"? This cannot be undone.`}
-        confirmLabel="Delete"
-        variant="destructive"
         icon={Trash2}
-      />
+        iconColor="bg-red-600"
+        size="xs"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-slate-600">
+            Permanently delete{' '}
+            <strong className="text-slate-900">"{deleteTarget?.title}"</strong>?
+            This cannot be undone. Enter your master password to confirm.
+          </p>
+          <div className="relative">
+            <input
+              type={showDeletePwd ? 'text' : 'password'}
+              value={deleteMasterPwd}
+              onChange={(e) => { setDeleteMasterPwd(e.target.value); setDeleteError(''); }}
+              onKeyDown={(e) => e.key === 'Enter' && handleDelete()}
+              placeholder="Master password"
+              autoFocus
+              className="w-full px-3 py-2.5 pr-10 rounded-xl border border-slate-200 bg-white text-sm font-mono placeholder:font-sans placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition-all"
+            />
+            <button
+              type="button"
+              onClick={() => setShowDeletePwd((p) => !p)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            >
+              {showDeletePwd ? <EyeOff size={14} /> : <Eye size={14} />}
+            </button>
+          </div>
+          {deleteError && <p className="text-xs text-red-600">{deleteError}</p>}
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={closeDeleteModal} fullWidth disabled={deleteLoading}>Cancel</Button>
+            <Button
+              variant="primary"
+              onClick={handleDelete}
+              loading={deleteLoading}
+              fullWidth
+              className="bg-red-600 hover:bg-red-700 focus-visible:ring-red-500"
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

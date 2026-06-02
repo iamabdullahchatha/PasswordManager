@@ -7,6 +7,7 @@ import {
   createVaultEntrySchema,
   updateVaultEntrySchema,
   revealPasswordSchema,
+  deleteVaultEntrySchema,
   listVaultQuerySchema,
   exportVaultSchema,
   importVaultSchema,
@@ -28,7 +29,7 @@ router.get('/',    validate(listVaultQuerySchema, 'query'), vaultController.list
 router.post('/',   validate(createVaultEntrySchema),        vaultController.create.bind(vaultController));
 router.get('/:id', vaultController.getById.bind(vaultController));
 router.patch('/:id', validate(updateVaultEntrySchema), vaultController.update.bind(vaultController));
-router.delete('/:id', vaultController.delete.bind(vaultController));
+router.delete('/:id', sensitiveRateLimiter, validate(deleteVaultEntrySchema), vaultController.delete.bind(vaultController));
 
 // ── Entry-level actions ─────────────────────────────────────────────────────
 router.patch('/:id/favorite',   vaultController.toggleFavorite.bind(vaultController));

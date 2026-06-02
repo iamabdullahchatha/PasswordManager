@@ -11,7 +11,7 @@ import { PageHeader } from '../../components/ui/PageHeader';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { CopyButton } from '../../components/ui/CopyButton';
-import { Modal, ConfirmDialog } from '../../components/ui/Modal';
+import { Modal } from '../../components/ui/Modal';
 import { PageLoader } from '../../components/ui/LoadingSpinner';
 import { vaultService } from '../../services/vault.service';
 import { toast } from '../../hooks/useToast';
@@ -131,7 +131,11 @@ export default function EmailDetailPage() {
   const [revealedSQ, setRevealedSQ]     = useState<string | null>(null);
   const [revealedNotes, setRevealedNotes]= useState<string | null>(null);
 
-  const [deleteModal, setDeleteModal]   = useState(false);
+  const [deleteModal,     setDeleteModal]     = useState(false);
+  const [deleteMasterPwd, setDeleteMasterPwd] = useState('');
+  const [showDeletePwd,   setShowDeletePwd]   = useState(false);
+  const [deleteError,     setDeleteError]     = useState('');
+  const [deleteLoading,   setDeleteLoading]   = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -167,10 +171,24 @@ export default function EmailDetailPage() {
     finally { setRevealLoading(false); }
   };
 
+  const closeDeleteModal = () => {
+    setDeleteModal(false);
+    setDeleteMasterPwd('');
+    setShowDeletePwd(false);
+    setDeleteError('');
+  };
+
   const handleDelete = async () => {
     if (!id) return;
-    try { await vaultService.delete(id); toast('Entry deleted', 'success'); navigate('/vault'); }
-    catch (err) { toast(getErrorMessage(err), 'error'); }
+    if (!deleteMasterPwd.trim()) { setDeleteError('Enter your master password'); return; }
+    setDeleteLoading(true); setDeleteError('');
+    try {
+      await vaultService.delete(id, deleteMasterPwd);
+      toast('Entry deleted', 'success');
+      navigate('/vault');
+    } catch (err) {
+      setDeleteError(getErrorMessage(err));
+    } finally { setDeleteLoading(false); }
   };
 
   const handleArchive = async () => {
@@ -537,17 +555,54 @@ export default function EmailDetailPage() {
         </div>
       </Modal>
 
-      {/* ── Delete confirm ──────────────────────────────────────────── */}
-      <ConfirmDialog
+      {/* ── Delete with master password ─────────────────────────────── */}
+      <Modal
         open={deleteModal}
-        onClose={() => setDeleteModal(false)}
-        onConfirm={handleDelete}
+        onClose={closeDeleteModal}
         title="Delete Entry"
-        description={`Permanently delete "${entry.title}"? This cannot be undone.`}
-        confirmLabel="Delete"
-        variant="destructive"
         icon={Trash2}
-      />
+        iconColor="bg-red-600"
+        size="xs"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-slate-600">
+            Permanently delete{' '}
+            <strong className="text-slate-900">"{entry.title}"</strong>?
+            This cannot be undone. Enter your master password to confirm.
+          </p>
+          <div className="relative">
+            <input
+              type={showDeletePwd ? 'text' : 'password'}
+              value={deleteMasterPwd}
+              onChange={(e) => { setDeleteMasterPwd(e.target.value); setDeleteError(''); }}
+              onKeyDown={(e) => e.key === 'Enter' && handleDelete()}
+              placeholder="Master password"
+              autoFocus
+              className="w-full px-3 py-2.5 pr-10 rounded-xl border border-slate-200 bg-white text-sm font-mono placeholder:font-sans placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition-all"
+            />
+            <button
+              type="button"
+              onClick={() => setShowDeletePwd((p) => !p)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            >
+              {showDeletePwd ? <EyeOff size={14} /> : <Eye size={14} />}
+            </button>
+          </div>
+          {deleteError && <p className="text-xs text-red-600">{deleteError}</p>}
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={closeDeleteModal} fullWidth disabled={deleteLoading}>Cancel</Button>
+            <Button
+              variant="primary"
+              onClick={handleDelete}
+              loading={deleteLoading}
+              fullWidth
+              className="bg-red-600 hover:bg-red-700 focus-visible:ring-red-500"
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

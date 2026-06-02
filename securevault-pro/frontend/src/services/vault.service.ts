@@ -62,8 +62,8 @@ export const vaultService = {
   update: (id: string, dto: UpdateVaultDto) =>
     api.patch<ApiResponse<VaultEntry>>(`/vault/${id}`, dto).then((r) => r.data),
 
-  delete: (id: string) =>
-    api.delete<ApiResponse>(`/vault/${id}`).then((r) => r.data),
+  delete: (id: string, masterPassword: string) =>
+    api.delete<ApiResponse>(`/vault/${id}`, { data: { masterPassword } }).then((r) => r.data),
 
   /* ── Actions ─────────────────────────────────────────────────────────── */
   reveal: (id: string, masterPassword: string, field: 'password' | 'backupCodes' | 'appPasswords' | 'securityQuestions' | 'notes' = 'password') =>
