@@ -29,8 +29,7 @@ export function EmptyState({ icon: Icon, title, description, action, size = 'md'
       {/* Icon container */}
       <div className="relative mb-5">
         {/* Glow ring */}
-        <div className={cn(s.iconWrapper, 'absolute inset-0 -z-10 mx-auto scale-125')}
-          style={{ background: 'radial-gradient(circle, rgba(37,99,235,0.12) 0%, transparent 70%)' }} />
+        <div className={cn(s.iconWrapper, 'absolute inset-0 bg-blue-500/15 blur-xl -z-10 mx-auto scale-125')} />
         {/* Icon box */}
         <div className={cn(
           s.iconWrapper,

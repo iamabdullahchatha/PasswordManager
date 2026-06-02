@@ -177,8 +177,7 @@ export default function ProfileSettingsPage() {
           <div className="absolute inset-0 opacity-20"
             style={{ backgroundImage: 'radial-gradient(circle,rgba(255,255,255,0.1) 1px,transparent 1px)', backgroundSize: '18px 18px' }}
           />
-          <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 65%)' }} />
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
         </div>
 
         <div className="px-6 pb-6">

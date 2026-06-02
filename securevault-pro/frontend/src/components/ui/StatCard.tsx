@@ -64,12 +64,10 @@ export function StatCard({
       )}
       style={{ boxShadow: glow }}
     >
-      {/* Top-right glow orb — radial-gradient avoids CSS filter GPU compositing bug on Android */}
-      <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%)' }} />
+      {/* Top-right glow orb */}
+      <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl pointer-events-none" />
       {/* Bottom-left depth shadow */}
-      <div className="absolute -bottom-8 -left-6 w-32 h-32 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(0,0,0,0.18) 0%, transparent 70%)' }} />
+      <div className="absolute -bottom-8 -left-6 w-32 h-32 bg-black/15 rounded-full blur-2xl pointer-events-none" />
       {/* Subtle mesh pattern */}
       <div className="absolute inset-0 pointer-events-none"
         style={{

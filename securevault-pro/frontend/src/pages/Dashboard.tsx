@@ -149,12 +149,9 @@ export default function DashboardPage() {
             backgroundSize: '32px 32px',
           }}
         />
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 65%)' }} />
-        <div className="absolute top-0 right-1/3 w-48 h-48 rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(129,140,248,0.18) 0%, transparent 65%)' }} />
-        <div className="absolute -bottom-12 -left-8 w-48 h-48 rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(147,197,253,0.14) 0%, transparent 65%)' }} />
+        <div className="absolute -top-16 -right-16 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-1/3 w-48 h-48 bg-indigo-400/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-12 -left-8 w-48 h-48 bg-blue-300/15 rounded-full blur-3xl pointer-events-none" />
         {/* Shimmer line */}
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
 
@@ -385,7 +382,7 @@ export default function DashboardPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 + i * 0.07, duration: 0.35 }}
-                className="bg-white rounded-2xl border border-slate-200/80 p-4 cursor-pointer group relative hover:-translate-y-1 transition-transform duration-200"
+                className="bg-white rounded-2xl border border-slate-200/80 p-4 cursor-pointer group relative overflow-hidden hover:-translate-y-1 transition-transform duration-200"
                 style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.04)' }}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 24px ${action.glow}, 0 2px 8px rgba(0,0,0,0.06)`; }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = '0 1px 4px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.04)'; }}
