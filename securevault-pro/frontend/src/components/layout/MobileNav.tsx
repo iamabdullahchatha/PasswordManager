@@ -1,7 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { Sidebar } from './Sidebar';
-import { useState } from 'react';
 
 interface MobileNavProps {
   open: boolean;
@@ -9,8 +8,6 @@ interface MobileNavProps {
 }
 
 export function MobileNav({ open, onClose }: MobileNavProps) {
-  const [collapsed] = useState(false);
-
   return (
     <AnimatePresence>
       {open && (
@@ -22,27 +19,28 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-sidebar lg:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-overlay lg:hidden"
           />
 
-          {/* Drawer */}
+          {/* Drawer — explicit width, close button lives INSIDE so it can never
+              leak outside the panel (which caused the stray X at the top-left). */}
           <motion.div
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed inset-y-0 left-0 z-overlay lg:hidden flex"
+            transition={{ type: 'spring', stiffness: 320, damping: 34 }}
+            className="fixed inset-y-0 left-0 z-modal lg:hidden w-[260px] max-w-[82vw] overflow-hidden"
           >
-            <div className="relative h-full">
-              {/* Close button */}
-              <button
-                onClick={onClose}
-                className="absolute top-4 -right-10 z-10 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30 transition-colors"
-              >
-                <X size={15} />
-              </button>
-              <Sidebar collapsed={collapsed} onToggle={onClose} />
-            </div>
+            <Sidebar collapsed={false} onToggle={onClose} hideToggle />
+
+            {/* Close button — inside the drawer, top-right corner */}
+            <button
+              onClick={onClose}
+              aria-label="Close menu"
+              className="absolute top-3.5 right-3 z-10 w-8 h-8 rounded-lg flex items-center justify-center text-sidebar-muted hover:text-white hover:bg-sidebar-accent transition-colors"
+            >
+              <X size={16} />
+            </button>
           </motion.div>
         </>
       )}

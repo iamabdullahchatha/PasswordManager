@@ -61,9 +61,11 @@ const ROLE_HIERARCHY: Record<Role, number> = { SUPER_ADMIN: 3, ADMIN: 2, USER: 1
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
+  /** Hide the collapse chevron — used in the mobile drawer, which has its own X close button. */
+  hideToggle?: boolean;
 }
 
-export function Sidebar({ collapsed, onToggle }: SidebarProps) {
+export function Sidebar({ collapsed, onToggle, hideToggle = false }: SidebarProps) {
   const { user, refreshToken, logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
@@ -120,12 +122,14 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             )}
           </AnimatePresence>
         </div>
-        <button
-          onClick={onToggle}
-          className="flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center text-sidebar-muted hover:text-white hover:bg-sidebar-accent transition-colors"
-        >
-          {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-        </button>
+        {!hideToggle && (
+          <button
+            onClick={onToggle}
+            className="flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center text-sidebar-muted hover:text-white hover:bg-sidebar-accent transition-colors"
+          >
+            {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+          </button>
+        )}
       </div>
 
       {/* Navigation */}

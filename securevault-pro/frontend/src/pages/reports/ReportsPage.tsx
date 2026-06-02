@@ -190,7 +190,7 @@ function MonthlyContent({ data, year, month }: { data: any; year: number; month:
     <div className="space-y-6">
       <ReportHeader title={`${MONTH_NAMES[month - 1]} ${year}`} total={data.total} subtitle={`${data.count} transactions · Daily avg ${formatCurrency(data.dailyAvg)}`} />
       {data.byStatus && (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {['PAID', 'PENDING', 'CANCELLED'].map((s) => (
             <div key={s} className={cn('rounded-2xl p-4 border', s === 'PAID' ? 'bg-green-50 border-green-100' : s === 'PENDING' ? 'bg-amber-50 border-amber-100' : 'bg-slate-50 border-slate-100')}>
               <p className="text-xs font-semibold text-slate-600 mb-1">{s.charAt(0) + s.slice(1).toLowerCase()}</p>
@@ -314,7 +314,7 @@ function BudgetContent({ data, budgets }: { data: any; budgets: any[] }) {
   return (
     <div className="space-y-6">
       <ReportHeader title={`Budget — ${MONTH_NAMES[(data?.month ?? 1) - 1]} ${data?.year}`} total={data?.totalSpent ?? 0} subtitle={`Budget: ${formatCurrency(data?.totalBudget ?? 0)}`} />
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-center">
           <p className="text-xs font-semibold text-blue-700 mb-1">Budget</p>
           <p className="text-xl font-extrabold text-slate-900">{formatCurrency(data?.totalBudget ?? 0)}</p>
