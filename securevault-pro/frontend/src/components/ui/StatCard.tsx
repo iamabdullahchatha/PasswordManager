@@ -53,12 +53,12 @@ export function StatCard({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{ delay: index * 0.07, duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-      whileHover={{ y: -5, transition: { duration: 0.2, ease: 'easeOut' } }}
       className={cn(
         'relative overflow-hidden rounded-2xl p-5 text-white cursor-default select-none',
+        'hover:-translate-y-1 transition-transform duration-200',
         gradient,
         className,
       )}

@@ -133,8 +133,8 @@ export default function DashboardPage() {
     <div className="space-y-6">
       {/* ── Welcome Banner ──────────────────────────────────────────────────── */}
       <motion.div
-        initial={{ opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
         className="relative overflow-hidden rounded-2xl text-white"
         style={{
@@ -235,8 +235,8 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {(stats?.vault.weakPasswords ?? 0) > 0 && (
             <motion.div
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
               className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-red-50 to-orange-50 border border-red-200"
             >
@@ -258,8 +258,8 @@ export default function DashboardPage() {
           )}
           {(stats?.vault.expiringSoon ?? 0) > 0 && (
             <motion.div
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{ delay: 0.25 }}
               className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200"
             >
@@ -379,11 +379,10 @@ export default function DashboardPage() {
           ].map((action, i) => (
             <Link key={action.href} to={action.href}>
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 + i * 0.07, duration: 0.35 }}
-                whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                className="bg-white rounded-2xl border border-slate-200/80 p-4 cursor-pointer group transition-all relative overflow-hidden"
+                className="bg-white rounded-2xl border border-slate-200/80 p-4 cursor-pointer group relative overflow-hidden hover:-translate-y-1 transition-transform duration-200"
                 style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.04)' }}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 24px ${action.glow}, 0 2px 8px rgba(0,0,0,0.06)`; }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = '0 1px 4px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.04)'; }}
