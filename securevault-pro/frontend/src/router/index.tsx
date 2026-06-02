@@ -66,6 +66,7 @@ import SecuritySettingsPage from '../pages/settings/SecuritySettings';
 
 // Activity
 import ActivityLogsPage from '../pages/ActivityLogsPage';
+import NotificationsPage from '../pages/NotificationsPage';
 
 export const router = createBrowserRouter([
   { path: '/login',           element: <LoginPage />,          errorElement: <RouteErrorBoundary /> },
@@ -117,8 +118,9 @@ export const router = createBrowserRouter([
       { path: 'settings/profile',  element: <ProfileSettingsPage /> },
       { path: 'settings/security', element: <SecuritySettingsPage /> },
 
-      // ── Logs ───────────────────────────────────────────────────────────
+      // ── Logs / Notifications ───────────────────────────────────────────
       { path: 'activity-logs', element: <ActivityLogsPage /> },
+      { path: 'notifications', element: <NotificationsPage /> },
     ],
   },
   { path: '*', element: <Navigate to="/dashboard" replace /> },

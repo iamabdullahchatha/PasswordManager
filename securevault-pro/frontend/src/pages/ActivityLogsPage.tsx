@@ -68,10 +68,14 @@ export default function ActivityLogsPage() {
     try {
       const params: Record<string, string> = { page: String(page), limit: '30' };
       if (filterSuccess !== null) params.success = String(filterSuccess);
-      const res = await api.get('/api/v1/logs', { params });
+      // NOTE: api already has baseURL='/api/v1' — use the path WITHOUT that prefix
+      const res = await api.get('/logs', { params });
       setLogs(res.data.data ?? []);
       setTotalPages(res.data.meta?.totalPages ?? 1);
       setTotalLogs(res.data.meta?.total ?? 0);
+    } catch {
+      // Show empty state on error rather than crashing
+      setLogs([]);
     } finally { setLoading(false); }
   }, [page, filterSuccess]);
 

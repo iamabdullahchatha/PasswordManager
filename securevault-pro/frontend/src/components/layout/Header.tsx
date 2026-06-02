@@ -4,23 +4,37 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Bell, LogOut, User, Shield,
   ChevronDown, ChevronLeft, Menu, X, Activity,
-  CheckCircle, AlertTriangle, Clock,
+  CheckCircle, AlertTriangle, Clock, XCircle,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { authService } from '../../services/auth.service';
 import { cn } from '../../utils/cn';
 import { useDebounce } from '../../hooks/useDebounce';
+import { useNotifications, type AppNotification } from '../../hooks/useNotifications';
 
 interface HeaderProps {
   onMobileMenuToggle: () => void;
   sidebarCollapsed: boolean;
 }
 
-const NOTIFICATIONS = [
-  { id: 1, type: 'warning', title: 'Weak passwords detected', body: '3 vault entries need attention', time: '2m ago', read: false },
-  { id: 2, type: 'info', title: 'Monthly report ready', body: 'Your May spending summary is available', time: '1h ago', read: false },
-  { id: 3, type: 'success', title: 'Backup completed', body: 'All data securely backed up', time: '3h ago', read: true },
-];
+const NOTIF_ICON: Record<AppNotification['type'], React.ComponentType<any>> = {
+  warning: AlertTriangle,
+  error:   XCircle,
+  info:    Clock,
+  success: CheckCircle,
+};
+const NOTIF_ICON_CLASS: Record<AppNotification['type'], string> = {
+  warning: 'text-amber-500',
+  error:   'text-red-500',
+  info:    'text-blue-500',
+  success: 'text-green-500',
+};
+const NOTIF_BG: Record<AppNotification['type'], string> = {
+  warning: 'bg-amber-100',
+  error:   'bg-red-100',
+  info:    'bg-blue-100',
+  success: 'bg-green-100',
+};
 
 // ─── Mobile page-title map ────────────────────────────────────────────────────
 // Provides a human-readable title for the mobile header on every route.
@@ -41,6 +55,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/settings/profile':   'Profile',
   '/settings/security':  'Security',
   '/activity-logs':      'Activity Logs',
+  '/notifications':      'Notifications',
 };
 
 function getPageTitle(pathname: string): string {
@@ -64,8 +79,8 @@ export function Header({ onMobileMenuToggle, sidebarCollapsed }: HeaderProps) {
   const [profileOpen, setProfileOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const debouncedSearch = useDebounce(search, 400);
-
-  const unreadCount = NOTIFICATIONS.filter((n) => !n.read).length;
+  const { notifications } = useNotifications();
+  const unreadCount = notifications.length;
 
   // Show a back button on every page except the home dashboard
   const showBack = location.pathname !== '/dashboard';
@@ -221,33 +236,44 @@ export function Header({ onMobileMenuToggle, sidebarCollapsed }: HeaderProps) {
                   )}
                 </div>
                 <div className="max-h-80 overflow-y-auto">
-                  {NOTIFICATIONS.map((n) => (
-                    <div
-                      key={n.id}
-                      className={cn(
-                        'flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-100/70 last:border-0',
-                        !n.read && 'bg-blue-50/40',
-                      )}
-                    >
-                      <div className={cn(
-                        'w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5',
-                        n.type === 'warning' ? 'bg-amber-100' : n.type === 'success' ? 'bg-green-100' : 'bg-blue-100',
-                      )}>
-                        {n.type === 'warning' ? <AlertTriangle size={14} className="text-amber-500" /> :
-                         n.type === 'success' ? <CheckCircle size={14} className="text-green-500" /> :
-                         <Clock size={14} className="text-blue-500" />}
+                  {notifications.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center mb-3">
+                        <CheckCircle size={18} className="text-emerald-500" />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-slate-900">{n.title}</p>
-                        <p className="text-xs text-slate-500 mt-0.5">{n.body}</p>
-                        <p className="text-2xs text-slate-400 mt-1">{n.time}</p>
-                      </div>
-                      {!n.read && <div className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 flex-shrink-0" />}
+                      <p className="text-xs font-semibold text-slate-700">All clear</p>
+                      <p className="text-xs text-slate-400 mt-0.5">No active notifications</p>
                     </div>
-                  ))}
+                  ) : (
+                    notifications.map((n) => {
+                      const Icon = NOTIF_ICON[n.type];
+                      return (
+                        <button
+                          key={n.id}
+                          onClick={() => { if (n.link) { navigate(n.link); setNotifOpen(false); } }}
+                          className={cn(
+                            'w-full flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors text-left border-b border-slate-100/70 last:border-0',
+                            n.link && 'cursor-pointer',
+                          )}
+                        >
+                          <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5', NOTIF_BG[n.type])}>
+                            <Icon size={14} className={NOTIF_ICON_CLASS[n.type]} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-slate-900">{n.title}</p>
+                            <p className="text-xs text-slate-500 mt-0.5">{n.body}</p>
+                          </div>
+                          <div className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 flex-shrink-0" />
+                        </button>
+                      );
+                    })
+                  )}
                 </div>
                 <div className="p-2 border-t border-slate-100">
-                  <button className="w-full text-xs text-blue-600 hover:text-blue-700 font-medium py-1.5 rounded-lg hover:bg-blue-50 transition-colors">
+                  <button
+                    onClick={() => { navigate('/notifications'); setNotifOpen(false); }}
+                    className="w-full text-xs text-blue-600 hover:text-blue-700 font-medium py-1.5 rounded-lg hover:bg-blue-50 transition-colors"
+                  >
                     View all notifications
                   </button>
                 </div>

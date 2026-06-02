@@ -19,6 +19,7 @@ import reportRoutes from './modules/reports/reports.routes';
 import logRoutes from './modules/logs/logs.routes';
 import dashboardRoutes from './modules/dashboard/dashboard.routes';
 import settingsRoutes from './modules/settings/settings.routes';
+import notificationsRoutes from './modules/notifications/notifications.routes';
 
 export function createApp(): Application {
   const app = express();
@@ -78,6 +79,7 @@ export function createApp(): Application {
   app.use(`${apiPrefix}/logs`, logRoutes);
   app.use(`${apiPrefix}/dashboard`, dashboardRoutes);
   app.use(`${apiPrefix}/settings`, settingsRoutes);
+  app.use(`${apiPrefix}/notifications`, notificationsRoutes);
 
   // ── 404 & error handlers ────────────────────────────────────────────────────
   app.use(notFound);
