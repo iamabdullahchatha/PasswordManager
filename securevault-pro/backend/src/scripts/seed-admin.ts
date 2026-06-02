@@ -1,63 +1,72 @@
 /**
  * Production-safe Super Admin seeder.
  *
- * Idempotent: creates the Super Admin if it does not exist, or promotes /
- * resets the existing account (by email) to Super Admin. Safe to run many times.
+ * Designed to run BOTH manually and automatically as part of start:prod.
+ * It never crashes the boot sequence — on any skip/error it exits 0 so the
+ * API server still starts.
  *
- * Secrets are NEVER hardcoded — the password comes from the SUPER_ADMIN_PASSWORD
- * environment variable. The rest have sensible defaults but can be overridden.
+ * Behaviour:
+ *   - SUPER_ADMIN_PASSWORD not set        → skip (nothing to do).
+ *   - admin email does not exist          → CREATE the Super Admin.
+ *   - admin email already exists          → leave it untouched (so a password
+ *                                           the user later changed is preserved),
+ *                                           UNLESS ADMIN_SEED_FORCE=true, which
+ *                                           promotes + resets that account.
+ *
+ * Secrets are NEVER hardcoded — the password always comes from the
+ * SUPER_ADMIN_PASSWORD environment variable.
  *
  * Local (dev):   npm run seed:admin:dev
- * Production:    npm run seed:admin      (runs the compiled dist/ version)
+ * Production:    npm run seed:admin       (compiled dist/ version)
+ * Automatic:     runs inside start:prod on every Railway deploy.
  *
- * Required env:
- *   SUPER_ADMIN_PASSWORD   the admin password (min 8 chars)
- *   DATABASE_URL           provided automatically by Railway
- *
- * Optional env (override defaults):
+ * Env:
+ *   SUPER_ADMIN_PASSWORD   (required to do anything) admin password, min 8 chars
+ *   ADMIN_SEED_FORCE       (optional) "true" → reset/promote an existing account
  *   SUPER_ADMIN_EMAIL      default: abdullahchattha988@gmail.com
  *   SUPER_ADMIN_USERNAME   default: Super_admin
  *   SUPER_ADMIN_FIRSTNAME  default: Abdullah
  *   SUPER_ADMIN_LASTNAME   default: Chatha
+ *   DATABASE_URL           provided automatically by Railway
  */
 import 'dotenv/config';
 import { Role } from '@prisma/client';
 import { prisma } from '../config/database';
 import { hashPassword } from '../utils/password';
 
-async function main(): Promise<void> {
+async function run(): Promise<void> {
   const email     = (process.env.SUPER_ADMIN_EMAIL     ?? 'abdullahchattha988@gmail.com').toLowerCase().trim();
   const username  =  process.env.SUPER_ADMIN_USERNAME  ?? 'Super_admin';
   const firstName =  process.env.SUPER_ADMIN_FIRSTNAME ?? 'Abdullah';
   const lastName  =  process.env.SUPER_ADMIN_LASTNAME  ?? 'Chatha';
   const password  =  process.env.SUPER_ADMIN_PASSWORD;
+  const force     =  process.env.ADMIN_SEED_FORCE === 'true';
 
-  // ── Safety checks ──────────────────────────────────────────────────────────
   if (!password) {
-    console.error('❌ SUPER_ADMIN_PASSWORD is not set.');
-    console.error('   Set it before running, e.g. on Railway add a variable');
-    console.error('   SUPER_ADMIN_PASSWORD=your-strong-password, then run the seed.');
-    process.exit(1);
+    console.log('ℹ️  [admin-seed] SUPER_ADMIN_PASSWORD not set — skipping admin seed.');
+    return;
   }
   if (password.length < 8) {
-    console.error('❌ SUPER_ADMIN_PASSWORD must be at least 8 characters.');
-    process.exit(1);
+    console.log('⚠️  [admin-seed] SUPER_ADMIN_PASSWORD is shorter than 8 chars — skipping.');
+    return;
   }
 
-  const hashed = await hashPassword(password);
-
-  // ── Does this email already exist? ─────────────────────────────────────────
   const existing = await prisma.user.findUnique({
     where: { email },
     select: { id: true, username: true, role: true },
   });
 
-  let user;
+  // ── Already exists ──────────────────────────────────────────────────────────
+  if (existing && !force) {
+    console.log(`✅ [admin-seed] Super Admin already exists (${email}, role ${existing.role}). Leaving untouched.`);
+    console.log('   Set ADMIN_SEED_FORCE=true to reset its password / promote it.');
+    return;
+  }
 
-  if (existing) {
-    // Promote / reset the existing account. We do NOT change the username here
-    // to avoid colliding with the unique constraint.
-    user = await prisma.user.update({
+  const hashed = await hashPassword(password);
+
+  if (existing && force) {
+    const user = await prisma.user.update({
       where: { email },
       data: {
         firstName,
@@ -72,48 +81,45 @@ async function main(): Promise<void> {
       },
       select: { id: true, email: true, username: true, role: true },
     });
-    console.log(`♻️  Updated existing account → Super Admin: ${user.email}`);
-  } else {
-    // Guard against a username collision with a different account.
-    const usernameTaken = await prisma.user.findUnique({
-      where: { username },
-      select: { id: true },
-    });
-    const finalUsername = usernameTaken ? `${username}_${Date.now().toString().slice(-4)}` : username;
-
-    user = await prisma.user.create({
-      data: {
-        email,
-        username: finalUsername,
-        firstName,
-        lastName,
-        password: hashed,
-        role: Role.SUPER_ADMIN,
-        isActive: true,
-        isEmailVerified: true,
-      },
-      select: { id: true, email: true, username: true, role: true },
-    });
-    console.log(`✅ Created new Super Admin: ${user.email}`);
-    if (finalUsername !== username) {
-      console.log(`   ⚠️  Username "${username}" was taken; used "${finalUsername}" instead.`);
-    }
+    console.log(`♻️  [admin-seed] Force-updated existing account → Super Admin: ${user.email} (${user.role})`);
+    return;
   }
 
-  console.log('');
-  console.log('   id:       ' + user.id);
-  console.log('   email:    ' + user.email);
-  console.log('   username: ' + user.username);
-  console.log('   role:     ' + user.role);
-  console.log('');
-  console.log('🔐 You can now sign in with this email and the password you set.');
+  // ── Create new ──────────────────────────────────────────────────────────────
+  const usernameTaken = await prisma.user.findUnique({
+    where: { username },
+    select: { id: true },
+  });
+  const finalUsername = usernameTaken ? `${username}_${Date.now().toString().slice(-4)}` : username;
+
+  const user = await prisma.user.create({
+    data: {
+      email,
+      username: finalUsername,
+      firstName,
+      lastName,
+      password: hashed,
+      role: Role.SUPER_ADMIN,
+      isActive: true,
+      isEmailVerified: true,
+    },
+    select: { id: true, email: true, username: true, role: true },
+  });
+
+  console.log(`✅ [admin-seed] Created Super Admin: ${user.email}`);
+  if (finalUsername !== username) {
+    console.log(`   ⚠️  Username "${username}" was taken; used "${finalUsername}".`);
+  }
+  console.log(`   username: ${user.username} · role: ${user.role}`);
+  console.log('🔐 You can now sign in with this email and the SUPER_ADMIN_PASSWORD you set.');
 }
 
-main()
+run()
   .catch((err) => {
-    console.error('❌ Admin seed failed:', err instanceof Error ? err.message : err);
-    process.exit(1);
+    // Never block server startup — log loudly but exit 0.
+    console.error('⚠️  [admin-seed] Skipped due to error:', err instanceof Error ? err.message : err);
   })
   .finally(async () => {
     await prisma.$disconnect();
+    process.exit(0);
   });
