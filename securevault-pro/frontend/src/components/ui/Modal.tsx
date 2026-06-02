@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -25,6 +25,99 @@ interface ModalProps {
   iconColor?: string;
 }
 
+interface ModalPanelProps extends Omit<ModalProps, 'open'> {
+  children: ReactNode;
+}
+
+// Named variants — onAnimationStart receives the string "exit" only when using
+// named variants.  Inline objects (exit={{ opacity:0 }}) would deliver the
+// object itself, breaking the === 'exit' check.
+const BACKDROP_V = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1, transition: { duration: 0.2 } },
+  exit:    { opacity: 0, transition: { duration: 0.2 } },
+};
+
+const PANEL_V = {
+  initial: { opacity: 0, scale: 0.96, y: 12 },
+  animate: { opacity: 1, scale: 1,    y: 0,  transition: { type: 'spring' as const, stiffness: 350, damping: 28 } },
+  exit:    { opacity: 0, scale: 0.96, y: 12, transition: { type: 'spring' as const, stiffness: 350, damping: 28 } },
+};
+
+function ModalPanel({ onClose, title, description, children, size = 'md', hideClose, icon: Icon, iconColor }: ModalPanelProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Called with the variant name ("exit") the instant AnimatePresence starts
+  // removing this panel.  We disable pointer-events on the whole container so
+  // the page behind is immediately touchable during the fade-out.
+  const onExitStart = (def: string) => {
+    if (def === 'exit' && containerRef.current) {
+      containerRef.current.style.pointerEvents = 'none';
+    }
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className="fixed inset-0 z-modal flex items-center justify-center p-4"
+    >
+      {/* Backdrop */}
+      <motion.div
+        variants={BACKDROP_V}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm"
+        onClick={onClose}
+        onAnimationStart={onExitStart}
+      />
+
+      {/* Panel */}
+      <motion.div
+        variants={PANEL_V}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        className={cn(
+          'relative w-full bg-white rounded-2xl shadow-modal z-10',
+          'border border-slate-200/60',
+          SIZES[size],
+        )}
+      >
+        {/* Header */}
+        {title && (
+          <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-slate-100">
+            <div className="flex items-center gap-3">
+              {Icon && (
+                <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0', iconColor ?? 'bg-blue-100')}>
+                  <Icon size={17} className={iconColor ? 'text-white' : 'text-blue-600'} />
+                </div>
+              )}
+              <div>
+                <h2 className="text-base font-semibold text-slate-900">{title}</h2>
+                {description && <p className="text-sm text-slate-500 mt-0.5">{description}</p>}
+              </div>
+            </div>
+            {!hideClose && (
+              <button
+                onClick={onClose}
+                className="flex-shrink-0 ml-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Content */}
+        <div className={cn('', title ? 'p-6' : 'p-6')}>
+          {children}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 export function Modal({ open, onClose, title, description, children, size = 'md', hideClose, icon: Icon, iconColor }: ModalProps) {
   // Close on Escape
   useEffect(() => {
@@ -44,60 +137,17 @@ export function Modal({ open, onClose, title, description, children, size = 'md'
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-modal flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm"
-            onClick={onClose}
-          />
-
-          {/* Panel */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 12 }}
-            transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-            className={cn(
-              'relative w-full bg-white rounded-2xl shadow-modal z-10',
-              'border border-slate-200/60',
-              SIZES[size],
-            )}
-          >
-            {/* Header */}
-            {title && (
-              <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-slate-100">
-                <div className="flex items-center gap-3">
-                  {Icon && (
-                    <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0', iconColor ?? 'bg-blue-100')}>
-                      <Icon size={17} className={iconColor ? 'text-white' : 'text-blue-600'} />
-                    </div>
-                  )}
-                  <div>
-                    <h2 className="text-base font-semibold text-slate-900">{title}</h2>
-                    {description && <p className="text-sm text-slate-500 mt-0.5">{description}</p>}
-                  </div>
-                </div>
-                {!hideClose && (
-                  <button
-                    onClick={onClose}
-                    className="flex-shrink-0 ml-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-                  >
-                    <X size={16} />
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* Content */}
-            <div className={cn('', title ? 'p-6' : 'p-6')}>
-              {children}
-            </div>
-          </motion.div>
-        </div>
+        <ModalPanel
+          onClose={onClose}
+          title={title}
+          description={description}
+          size={size}
+          hideClose={hideClose}
+          icon={Icon}
+          iconColor={iconColor}
+        >
+          {children}
+        </ModalPanel>
       )}
     </AnimatePresence>
   );

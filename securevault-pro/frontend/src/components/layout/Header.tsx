@@ -42,6 +42,9 @@ export function Header({ onMobileMenuToggle, sidebarCollapsed }: HeaderProps) {
     return () => document.removeEventListener('mousedown', close);
   }, []);
 
+  // Close dropdowns on navigation (e.g. back button or programmatic navigate)
+  useEffect(() => { setNotifOpen(false); setProfileOpen(false); }, [location.pathname]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (debouncedSearch.trim()) {
