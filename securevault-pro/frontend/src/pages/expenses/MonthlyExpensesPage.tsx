@@ -22,6 +22,7 @@ import {
   EXPENSE_STATUS_LABELS, EXPENSE_STATUS_COLORS,
   MONTH_NAMES,
 } from '../../utils/format';
+import { useCurrencyStore } from '../../store/currencyStore';
 import { toast } from '../../hooks/useToast';
 import { getErrorMessage } from '../../services/api';
 import { cn } from '../../utils/cn';
@@ -37,6 +38,9 @@ function downloadCsv(blob: Blob, filename: string) {
 }
 
 export default function MonthlyExpensesPage() {
+  const { currency } = useCurrencyStore();
+  const fmt = (amount: number) => formatCurrency(amount, currency);
+
   const now   = new Date();
   const [year,  setYear]  = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
@@ -208,10 +212,10 @@ export default function MonthlyExpensesPage() {
           {/* ── Summary Cards ──────────────────────────────────────────── */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: 'Total Spent',   value: formatCurrency(data.total),          color: 'from-blue-500 to-blue-600',     bg: 'bg-blue-50'    },
-              { label: 'Paid',          value: formatCurrency(data.paid ?? 0),       color: 'from-green-500 to-green-600',   bg: 'bg-green-50'   },
-              { label: 'Pending',       value: formatCurrency(data.pending ?? 0),    color: 'from-amber-500 to-amber-600',   bg: 'bg-amber-50'   },
-              { label: 'Daily Average', value: formatCurrency(data.dailyAvg ?? 0),   color: 'from-violet-500 to-violet-600', bg: 'bg-violet-50'  },
+              { label: 'Total Spent',   value: fmt(data.total),          color: 'from-blue-500 to-blue-600',     bg: 'bg-blue-50'    },
+              { label: 'Paid',          value: fmt(data.paid ?? 0),       color: 'from-green-500 to-green-600',   bg: 'bg-green-50'   },
+              { label: 'Pending',       value: fmt(data.pending ?? 0),    color: 'from-amber-500 to-amber-600',   bg: 'bg-amber-50'   },
+              { label: 'Daily Average', value: fmt(data.dailyAvg ?? 0),   color: 'from-violet-500 to-violet-600', bg: 'bg-violet-50'  },
             ].map((s, i) => (
               <motion.div
                 key={s.label}
@@ -232,14 +236,14 @@ export default function MonthlyExpensesPage() {
                 <div className="bg-red-50 border border-red-100 rounded-2xl p-4">
                   <p className="text-xs font-semibold text-red-700 mb-1">Highest Expense</p>
                   <p className="text-sm font-bold text-slate-900 truncate">{data.highest.title}</p>
-                  <p className="text-lg font-extrabold text-red-600">{formatCurrency(Number(data.highest.amount))}</p>
+                  <p className="text-lg font-extrabold text-red-600">{fmt(Number(data.highest.amount))}</p>
                 </div>
               )}
               {data.lowest && (
                 <div className="bg-green-50 border border-green-100 rounded-2xl p-4">
                   <p className="text-xs font-semibold text-green-700 mb-1">Lowest Expense</p>
                   <p className="text-sm font-bold text-slate-900 truncate">{data.lowest.title}</p>
-                  <p className="text-lg font-extrabold text-green-600">{formatCurrency(Number(data.lowest.amount))}</p>
+                  <p className="text-lg font-extrabold text-green-600">{fmt(Number(data.lowest.amount))}</p>
                 </div>
               )}
             </div>
@@ -306,7 +310,7 @@ export default function MonthlyExpensesPage() {
                       <div key={cat}>
                         <div className="flex justify-between text-sm mb-1.5">
                           <span className="font-medium text-slate-900 truncate flex-1">{EXPENSE_CATEGORY_LABELS[cat] ?? cat}</span>
-                          <span className="text-slate-600 font-semibold ml-2">{formatCurrency(amount as number)}</span>
+                          <span className="text-slate-600 font-semibold ml-2">{fmt(amount as number)}</span>
                         </div>
                         <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                           <motion.div

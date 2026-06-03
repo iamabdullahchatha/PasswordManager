@@ -11,6 +11,7 @@ import { MonthComparisonChart } from '../../components/charts/MonthComparisonCha
 import { PageLoader } from '../../components/ui/LoadingSpinner';
 import { expensesService } from '../../services/expenses.service';
 import { formatCurrency, EXPENSE_CATEGORY_LABELS, MONTH_SHORT } from '../../utils/format';
+import { useCurrencyStore } from '../../store/currencyStore';
 import { cn } from '../../utils/cn';
 import { toast } from '../../hooks/useToast';
 
@@ -22,6 +23,9 @@ function downloadCsv(blob: Blob, filename: string) {
 }
 
 export default function YearlyExpensesPage() {
+  const { currency } = useCurrencyStore();
+  const fmt = (amount: number) => formatCurrency(amount, currency);
+
   const now  = new Date();
   const [year,  setYear]  = useState(now.getFullYear());
   const [data,  setData]  = useState<any>(null);
@@ -82,8 +86,8 @@ export default function YearlyExpensesPage() {
           {/* ── Summary Cards ─────────────────────────────────────────── */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: 'Total Spent',        value: formatCurrency(data.total),               icon: BarChart3,    gradient: 'from-blue-500 to-blue-600'      },
-              { label: 'Monthly Average',    value: formatCurrency(data.total / 12),           icon: TrendingUp,   gradient: 'from-emerald-500 to-emerald-600' },
+              { label: 'Total Spent',        value: fmt(data.total),               icon: BarChart3,    gradient: 'from-blue-500 to-blue-600'      },
+              { label: 'Monthly Average',    value: fmt(data.total / 12),           icon: TrendingUp,   gradient: 'from-emerald-500 to-emerald-600' },
               { label: 'Best Month',         value: MONTH_SHORT[(data.highestMonth?.month ?? 1) - 1], icon: TrendingUp, gradient: 'from-orange-500 to-orange-600' },
               { label: 'Total Transactions', value: String(data.expenses?.length ?? 0),        icon: TrendingDown, gradient: 'from-violet-500 to-violet-600'  },
             ].map((s, i) => (
@@ -102,7 +106,7 @@ export default function YearlyExpensesPage() {
                 </div>
                 <p className="text-xl font-extrabold text-slate-900">{s.value}</p>
                 {s.label === 'Best Month' && data.highestMonth && (
-                  <p className="text-xs text-slate-500 mt-1">{formatCurrency(data.highestMonth.total)}</p>
+                  <p className="text-xs text-slate-500 mt-1">{fmt(data.highestMonth.total)}</p>
                 )}
               </motion.div>
             ))}
@@ -117,7 +121,7 @@ export default function YearlyExpensesPage() {
               <div>
                 <p className="text-xs font-semibold text-slate-600">Year-over-Year Comparison</p>
                 <p className="text-sm text-slate-700 mt-1">
-                  {year} vs {year - 1}: {formatCurrency(compareData.year1?.total ?? 0)} vs {formatCurrency(compareData.year2?.total ?? 0)}
+                  {year} vs {year - 1}: {fmt(compareData.year1?.total ?? 0)} vs {fmt(compareData.year2?.total ?? 0)}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -210,7 +214,7 @@ export default function YearlyExpensesPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-bold text-slate-900">{formatCurrency(vals.total)}</p>
+                      <p className="text-sm font-bold text-slate-900">{fmt(vals.total)}</p>
                       <p className="text-xs text-slate-400">{vals.percentage?.toFixed(1)}%</p>
                     </div>
                   </div>

@@ -16,6 +16,7 @@ import {
   formatCurrency, EXPENSE_CATEGORY_LABELS, EXPENSE_CATEGORY_COLORS,
   PAYMENT_METHOD_LABELS, MONTH_NAMES, MONTH_SHORT,
 } from '../../utils/format';
+import { useCurrencyStore } from '../../store/currencyStore';
 import { cn } from '../../utils/cn';
 import { toast } from '../../hooks/useToast';
 
@@ -186,15 +187,17 @@ export default function ReportsPage() {
 // ─── Monthly ─────────────────────────────────────────────────────────────────
 
 function MonthlyContent({ data, year, month }: { data: any; year: number; month: number }) {
+  const { currency } = useCurrencyStore();
+  const fmt = (amount: number) => formatCurrency(amount, currency);
   return (
     <div className="space-y-6">
-      <ReportHeader title={`${MONTH_NAMES[month - 1]} ${year}`} total={data.total} subtitle={`${data.count} transactions · Daily avg ${formatCurrency(data.dailyAvg)}`} />
+      <ReportHeader title={`${MONTH_NAMES[month - 1]} ${year}`} total={data.total} subtitle={`${data.count} transactions · Daily avg ${fmt(data.dailyAvg)}`} fmt={fmt} />
       {data.byStatus && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {['PAID', 'PENDING', 'CANCELLED'].map((s) => (
             <div key={s} className={cn('rounded-2xl p-4 border', s === 'PAID' ? 'bg-green-50 border-green-100' : s === 'PENDING' ? 'bg-amber-50 border-amber-100' : 'bg-slate-50 border-slate-100')}>
               <p className="text-xs font-semibold text-slate-600 mb-1">{s.charAt(0) + s.slice(1).toLowerCase()}</p>
-              <p className="text-lg font-extrabold text-slate-900">{formatCurrency(data.byStatus[s]?.total ?? 0)}</p>
+              <p className="text-lg font-extrabold text-slate-900">{fmt(data.byStatus[s]?.total ?? 0)}</p>
               <p className="text-xs text-slate-400">{data.byStatus[s]?.count ?? 0} tx</p>
             </div>
           ))}
@@ -202,13 +205,13 @@ function MonthlyContent({ data, year, month }: { data: any; year: number; month:
       )}
       {(data.highest || data.lowest) && (
         <div className="grid grid-cols-2 gap-4">
-          {data.highest && <HighLow label="Highest" color="red" expense={data.highest} />}
-          {data.lowest  && <HighLow label="Lowest"  color="green" expense={data.lowest} />}
+          {data.highest && <HighLow label="Highest" color="red" expense={data.highest} fmt={fmt} />}
+          {data.lowest  && <HighLow label="Lowest"  color="green" expense={data.lowest} fmt={fmt} />}
         </div>
       )}
       <ChartsGrid byCategory={data.byCategory} byPayment={data.byPaymentMethod} total={data.total} />
-      <CategoryTable data={data.byCategory} total={data.total} />
-      {data.topExpenses?.length > 0 && <TopExpenses list={data.topExpenses} />}
+      <CategoryTable data={data.byCategory} total={data.total} fmt={fmt} />
+      {data.topExpenses?.length > 0 && <TopExpenses list={data.topExpenses} fmt={fmt} />}
     </div>
   );
 }
@@ -216,19 +219,21 @@ function MonthlyContent({ data, year, month }: { data: any; year: number; month:
 // ─── Yearly ──────────────────────────────────────────────────────────────────
 
 function YearlyContent({ data, year }: { data: any; year: number }) {
+  const { currency } = useCurrencyStore();
+  const fmt = (amount: number) => formatCurrency(amount, currency);
   return (
     <div className="space-y-6">
-      <ReportHeader title={`Year ${year}`} total={data.total} subtitle={`Monthly avg: ${formatCurrency(data.monthlyAvg)}`} />
+      <ReportHeader title={`Year ${year}`} total={data.total} subtitle={`Monthly avg: ${fmt(data.monthlyAvg)}`} fmt={fmt} />
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4">
           <p className="text-xs font-semibold text-blue-700">Highest Month</p>
           <p className="text-lg font-extrabold text-slate-900">{data.highestMonth ? MONTH_SHORT[data.highestMonth.month - 1] : '—'}</p>
-          <p className="text-sm font-semibold text-blue-600">{formatCurrency(data.highestMonth?.total ?? 0)}</p>
+          <p className="text-sm font-semibold text-blue-600">{fmt(data.highestMonth?.total ?? 0)}</p>
         </div>
         <div className="bg-green-50 border border-green-100 rounded-2xl p-4">
           <p className="text-xs font-semibold text-green-700">Lowest Month</p>
           <p className="text-lg font-extrabold text-slate-900">{data.lowestMonth ? MONTH_SHORT[data.lowestMonth.month - 1] : '—'}</p>
-          <p className="text-sm font-semibold text-green-600">{formatCurrency(data.lowestMonth?.total ?? 0)}</p>
+          <p className="text-sm font-semibold text-green-600">{fmt(data.lowestMonth?.total ?? 0)}</p>
         </div>
       </div>
       <div className="bg-slate-50 rounded-2xl p-5">
@@ -236,7 +241,7 @@ function YearlyContent({ data, year }: { data: any; year: number }) {
         <MonthlyBarChart data={data.byMonth ?? []} highlightMonth={data.highestMonth?.month} />
       </div>
       <ChartsGrid byCategory={Object.fromEntries(Object.entries(data.byCategory ?? {}).map(([k, v]: any) => [k, v.total]))} byPayment={Object.fromEntries(Object.entries(data.byPaymentMethod ?? {}).map(([k, v]: any) => [k, v.total ?? v]))} total={data.total} />
-      <CategoryTable data={data.byCategory} total={data.total} />
+      <CategoryTable data={data.byCategory} total={data.total} fmt={fmt} />
     </div>
   );
 }
@@ -244,28 +249,30 @@ function YearlyContent({ data, year }: { data: any; year: number }) {
 // ─── Category ────────────────────────────────────────────────────────────────
 
 function CategoryContent({ data }: { data: any }) {
+  const { currency } = useCurrencyStore();
+  const fmt = (amount: number) => formatCurrency(amount, currency);
   const entries = Object.entries(data?.byCategory ?? {}).sort(([, a]: any, [, b]: any) => b.total - a.total);
   return (
     <div className="space-y-6">
-      <ReportHeader title={`Category Analysis ${data?.year}`} total={data?.total} subtitle="" />
+      <ReportHeader title={`Category Analysis ${data?.year}`} total={data?.total} subtitle="" fmt={fmt} />
       {entries.length > 0 && (
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4">
             <p className="text-xs font-semibold text-orange-700">Most Spent</p>
             <p className="text-sm font-bold text-slate-900">{EXPENSE_CATEGORY_LABELS[(entries[0]?.[0] as string)] ?? entries[0]?.[0]}</p>
-            <p className="text-xl font-extrabold text-orange-600">{formatCurrency((entries[0]?.[1] as any)?.total)}</p>
+            <p className="text-xl font-extrabold text-orange-600">{fmt((entries[0]?.[1] as any)?.total)}</p>
           </div>
           <div className="bg-cyan-50 border border-cyan-100 rounded-2xl p-4">
             <p className="text-xs font-semibold text-cyan-700">Least Spent</p>
             <p className="text-sm font-bold text-slate-900">{EXPENSE_CATEGORY_LABELS[(entries[entries.length - 1]?.[0] as string)] ?? entries[entries.length - 1]?.[0]}</p>
-            <p className="text-xl font-extrabold text-cyan-600">{formatCurrency((entries[entries.length - 1]?.[1] as any)?.total)}</p>
+            <p className="text-xl font-extrabold text-cyan-600">{fmt((entries[entries.length - 1]?.[1] as any)?.total)}</p>
           </div>
         </div>
       )}
       <div className="bg-slate-50 rounded-2xl p-5">
         <CategoryPieChart data={Object.fromEntries(entries.map(([k, v]: any) => [k, v.total]))} height={280} />
       </div>
-      <CategoryTable data={data?.byCategory} total={data?.total} />
+      <CategoryTable data={data?.byCategory} total={data?.total} fmt={fmt} />
     </div>
   );
 }
@@ -273,10 +280,12 @@ function CategoryContent({ data }: { data: any }) {
 // ─── Payment ─────────────────────────────────────────────────────────────────
 
 function PaymentContent({ data }: { data: any }) {
+  const { currency } = useCurrencyStore();
+  const fmt = (amount: number) => formatCurrency(amount, currency);
   const entries = Object.entries(data?.byMethod ?? {}).sort(([, a]: any, [, b]: any) => b.total - a.total);
   return (
     <div className="space-y-6">
-      <ReportHeader title={`Payment Methods ${data?.year}`} total={data?.total} subtitle="" />
+      <ReportHeader title={`Payment Methods ${data?.year}`} total={data?.total} subtitle="" fmt={fmt} />
       <div className="bg-slate-50 rounded-2xl p-5">
         <PaymentMethodDonutChart data={Object.fromEntries(entries.map(([k, v]: any) => [k, v.total]))} height={260} />
       </div>
@@ -292,7 +301,7 @@ function PaymentContent({ data }: { data: any }) {
                   <p className="text-xs text-slate-400">{vals.count} tx · {pct.toFixed(1)}%</p>
                 </div>
               </div>
-              <p className="text-sm font-bold text-slate-900">{formatCurrency(vals.total)}</p>
+              <p className="text-sm font-bold text-slate-900">{fmt(vals.total)}</p>
             </div>
           );
         })}
@@ -304,6 +313,8 @@ function PaymentContent({ data }: { data: any }) {
 // ─── Budget ──────────────────────────────────────────────────────────────────
 
 function BudgetContent({ data, budgets }: { data: any; budgets: any[] }) {
+  const { currency } = useCurrencyStore();
+  const fmt = (amount: number) => formatCurrency(amount, currency);
   const isOver = (data?.totalSpent ?? 0) > (data?.totalBudget ?? 0);
   if (!budgets.length) return (
     <div className="text-center py-12 text-slate-400">
@@ -313,20 +324,20 @@ function BudgetContent({ data, budgets }: { data: any; budgets: any[] }) {
   );
   return (
     <div className="space-y-6">
-      <ReportHeader title={`Budget — ${MONTH_NAMES[(data?.month ?? 1) - 1]} ${data?.year}`} total={data?.totalSpent ?? 0} subtitle={`Budget: ${formatCurrency(data?.totalBudget ?? 0)}`} />
+      <ReportHeader title={`Budget — ${MONTH_NAMES[(data?.month ?? 1) - 1]} ${data?.year}`} total={data?.totalSpent ?? 0} subtitle={`Budget: ${fmt(data?.totalBudget ?? 0)}`} fmt={fmt} />
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-center">
           <p className="text-xs font-semibold text-blue-700 mb-1">Budget</p>
-          <p className="text-xl font-extrabold text-slate-900">{formatCurrency(data?.totalBudget ?? 0)}</p>
+          <p className="text-xl font-extrabold text-slate-900">{fmt(data?.totalBudget ?? 0)}</p>
         </div>
         <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 text-center">
           <p className="text-xs font-semibold text-amber-700 mb-1">Spent</p>
-          <p className="text-xl font-extrabold text-slate-900">{formatCurrency(data?.totalSpent ?? 0)}</p>
+          <p className="text-xl font-extrabold text-slate-900">{fmt(data?.totalSpent ?? 0)}</p>
         </div>
         <div className={cn('border rounded-2xl p-4 text-center', isOver ? 'bg-red-50 border-red-100' : 'bg-green-50 border-green-100')}>
           <p className={cn('text-xs font-semibold mb-1', isOver ? 'text-red-700' : 'text-green-700')}>Remaining</p>
           <p className={cn('text-xl font-extrabold', isOver ? 'text-red-600' : 'text-green-600')}>
-            {formatCurrency(Math.abs(data?.remaining ?? 0))} {isOver ? 'over' : 'left'}
+            {fmt(Math.abs(data?.remaining ?? 0))} {isOver ? 'over' : 'left'}
           </p>
         </div>
       </div>
@@ -346,8 +357,8 @@ function BudgetContent({ data, budgets }: { data: any; budgets: any[] }) {
                   <p className="text-sm font-semibold text-slate-900">{b.category ? (EXPENSE_CATEGORY_LABELS[b.category] ?? b.category) : 'Overall'}</p>
                 </div>
                 <div className="text-right">
-                  <span className="text-sm font-bold text-slate-900">{formatCurrency(b.spent ?? 0)}</span>
-                  <span className="text-xs text-slate-400"> / {formatCurrency(Number(b.amount))}</span>
+                  <span className="text-sm font-bold text-slate-900">{fmt(b.spent ?? 0)}</span>
+                  <span className="text-xs text-slate-400"> / {fmt(Number(b.amount))}</span>
                 </div>
               </div>
               <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
@@ -369,6 +380,8 @@ function BudgetContent({ data, budgets }: { data: any; budgets: any[] }) {
 // ─── Compare ─────────────────────────────────────────────────────────────────
 
 function CompareContent({ data, year, month, year2, month2 }: any) {
+  const { currency } = useCurrencyStore();
+  const fmt = (amount: number) => formatCurrency(amount, currency);
   const cur = data?.current; const prev = data?.previous; const pct = data?.changePercent ?? 0;
   return (
     <div className="space-y-6">
@@ -381,12 +394,12 @@ function CompareContent({ data, year, month, year2, month2 }: any) {
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5">
           <p className="text-xs font-semibold text-blue-700 mb-1">{MONTH_NAMES[month - 1]} {year}</p>
-          <p className="text-2xl font-extrabold text-slate-900">{formatCurrency(cur?.total ?? 0)}</p>
+          <p className="text-2xl font-extrabold text-slate-900">{fmt(cur?.total ?? 0)}</p>
           <p className="text-xs text-slate-500 mt-1">{cur?.count ?? 0} transactions</p>
         </div>
         <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
           <p className="text-xs font-semibold text-slate-600 mb-1">{MONTH_NAMES[month2 - 1]} {year2}</p>
-          <p className="text-2xl font-extrabold text-slate-900">{formatCurrency(prev?.total ?? 0)}</p>
+          <p className="text-2xl font-extrabold text-slate-900">{fmt(prev?.total ?? 0)}</p>
           <p className="text-xs text-slate-500 mt-1">{prev?.count ?? 0} transactions</p>
         </div>
       </div>
@@ -410,7 +423,7 @@ function CompareContent({ data, year, month, year2, month2 }: any) {
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
-function ReportHeader({ title, total, subtitle }: { title: string; total: number; subtitle: string }) {
+function ReportHeader({ title, total, subtitle, fmt }: { title: string; total: number; subtitle: string; fmt: (n: number) => string }) {
   return (
     <div className="flex items-start justify-between border-b border-slate-100 pb-4">
       <div>
@@ -418,19 +431,19 @@ function ReportHeader({ title, total, subtitle }: { title: string; total: number
         {subtitle && <p className="text-sm text-slate-500 mt-0.5">{subtitle}</p>}
       </div>
       <div className="text-right flex-shrink-0">
-        <p className="text-2xl font-extrabold text-slate-900">{formatCurrency(total)}</p>
+        <p className="text-2xl font-extrabold text-slate-900">{fmt(total)}</p>
         <p className="text-xs text-slate-500">Total</p>
       </div>
     </div>
   );
 }
 
-function HighLow({ label, color, expense }: { label: string; color: 'red' | 'green'; expense: any }) {
+function HighLow({ label, color, expense, fmt }: { label: string; color: 'red' | 'green'; expense: any; fmt: (n: number) => string }) {
   return (
     <div className={cn('rounded-2xl p-4 border', color === 'red' ? 'bg-red-50 border-red-100' : 'bg-green-50 border-green-100')}>
       <p className={cn('text-xs font-semibold mb-1', color === 'red' ? 'text-red-700' : 'text-green-700')}>{label} Expense</p>
       <p className="text-sm font-bold text-slate-900 truncate">{expense.title}</p>
-      <p className={cn('text-xl font-extrabold', color === 'red' ? 'text-red-600' : 'text-green-600')}>{formatCurrency(Number(expense.amount))}</p>
+      <p className={cn('text-xl font-extrabold', color === 'red' ? 'text-red-600' : 'text-green-600')}>{fmt(Number(expense.amount))}</p>
     </div>
   );
 }
@@ -454,7 +467,7 @@ function ChartsGrid({ byCategory, byPayment, total }: { byCategory: any; byPayme
   );
 }
 
-function CategoryTable({ data, total }: { data: Record<string, any> | undefined | null; total: number }) {
+function CategoryTable({ data, total, fmt }: { data: Record<string, any> | undefined | null; total: number; fmt: (n: number) => string }) {
   if (!data || !Object.keys(data).length) return null;
   const entries = Object.entries(data).sort(([, a], [, b]) => (b as any).total - (a as any).total);
   return (
@@ -469,7 +482,7 @@ function CategoryTable({ data, total }: { data: Record<string, any> | undefined 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm font-semibold text-slate-900 truncate">{EXPENSE_CATEGORY_LABELS[cat] ?? cat}</span>
-                  <span className="text-sm font-bold text-slate-900 ml-2">{formatCurrency(vals.total)}</span>
+                  <span className="text-sm font-bold text-slate-900 ml-2">{fmt(vals.total)}</span>
                 </div>
                 <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
                   <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: EXPENSE_CATEGORY_COLORS[cat] ?? '#6b7280' }} />
@@ -484,7 +497,7 @@ function CategoryTable({ data, total }: { data: Record<string, any> | undefined 
   );
 }
 
-function TopExpenses({ list }: { list: any[] }) {
+function TopExpenses({ list, fmt }: { list: any[]; fmt: (n: number) => string }) {
   return (
     <div>
       <h3 className="text-sm font-semibold text-slate-900 mb-3">Top Expenses</h3>
@@ -498,7 +511,7 @@ function TopExpenses({ list }: { list: any[] }) {
                 <p className="text-xs text-slate-400">{EXPENSE_CATEGORY_LABELS[e.category] ?? e.category}</p>
               </div>
             </div>
-            <p className="text-sm font-bold text-slate-900">{formatCurrency(Number(e.amount))}</p>
+            <p className="text-sm font-bold text-slate-900">{fmt(Number(e.amount))}</p>
           </div>
         ))}
       </div>

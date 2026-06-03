@@ -13,6 +13,7 @@ import { Badge } from '../../components/ui/Badge';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { PageLoader } from '../../components/ui/LoadingSpinner';
 import { ConfirmDialog } from '../../components/ui/Modal';
+import { CurrencySelector } from '../../components/ui/CurrencySelector';
 import { CategoryPieChart } from '../../components/charts/CategoryPieChart';
 import { expensesService } from '../../services/expenses.service';
 import {
@@ -20,6 +21,7 @@ import {
   EXPENSE_CATEGORY_LABELS, EXPENSE_CATEGORY_COLORS,
   PAYMENT_METHOD_LABELS, EXPENSE_STATUS_LABELS, EXPENSE_STATUS_COLORS,
 } from '../../utils/format';
+import { useCurrencyStore } from '../../store/currencyStore';
 import { toast } from '../../hooks/useToast';
 import { getErrorMessage } from '../../services/api';
 import { cn } from '../../utils/cn';
@@ -33,6 +35,9 @@ function downloadCsv(blob: Blob, filename: string) {
 }
 
 export default function ExpenseDashboardPage() {
+  const { currency } = useCurrencyStore();
+  const fmt = (amount: number) => formatCurrency(amount, currency);
+
   const [summary, setSummary]   = useState<any>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [budgets, setBudgets]   = useState<Budget[]>([]);
@@ -102,6 +107,7 @@ export default function ExpenseDashboardPage() {
         icon={Wallet}
         action={
           <div className="flex flex-wrap gap-2">
+            <CurrencySelector />
             <Button variant="outline" size="sm" leftIcon={Download} onClick={handleExport} loading={exporting}>
               Export CSV
             </Button>
@@ -119,7 +125,7 @@ export default function ExpenseDashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <StatCard
           title="This Month"
-          value={formatCurrency(monthlyTotal)}
+          value={fmt(monthlyTotal)}
           subtitle={`${summary?.monthly?.count ?? 0} transactions`}
           icon={DollarSign}
           gradient="stat-emerald"
@@ -127,7 +133,7 @@ export default function ExpenseDashboardPage() {
         />
         <StatCard
           title="Year to Date"
-          value={formatCurrency(yearlyTotal)}
+          value={fmt(yearlyTotal)}
           subtitle={`${summary?.yearly?.count ?? 0} transactions`}
           icon={TrendingUp}
           gradient="stat-blue"
@@ -135,7 +141,7 @@ export default function ExpenseDashboardPage() {
         />
         <StatCard
           title="Daily Average"
-          value={formatCurrency(dailyAvg)}
+          value={fmt(dailyAvg)}
           subtitle="This month so far"
           icon={BarChart3}
           gradient="stat-violet"
@@ -144,7 +150,7 @@ export default function ExpenseDashboardPage() {
         <StatCard
           title="Month Growth"
           value={`${growthPct > 0 ? '+' : ''}${growthPct.toFixed(1)}%`}
-          subtitle={`vs last month (${formatCurrency(prevMonthTotal)})`}
+          subtitle={`vs last month (${fmt(prevMonthTotal)})`}
           icon={growthPct >= 0 ? ArrowUpRight : ArrowDownRight}
           gradient={growthPct >= 0 ? 'stat-rose' : 'stat-emerald'}
           index={3}
@@ -169,7 +175,7 @@ export default function ExpenseDashboardPage() {
             </div>
           </div>
           <p className={cn('text-xl font-extrabold', remaining !== null && remaining < 0 ? 'text-red-600' : 'text-slate-900')}>
-            {remaining !== null ? formatCurrency(remaining) : '—'}
+            {remaining !== null ? fmt(remaining) : '—'}
           </p>
           <p className="text-xs text-slate-500 mt-1">
             {remaining === null ? 'No budget set' : remaining < 0 ? 'Over budget!' : 'Remaining this month'}
@@ -208,7 +214,7 @@ export default function ExpenseDashboardPage() {
               <Clock size={14} className={pendingCount > 0 ? 'text-amber-600' : 'text-slate-400'} />
             </div>
           </div>
-          <p className="text-xl font-extrabold text-slate-900">{formatCurrency(pendingTotal)}</p>
+          <p className="text-xl font-extrabold text-slate-900">{fmt(pendingTotal)}</p>
           <p className="text-xs text-slate-500 mt-1">{pendingCount} unpaid expense{pendingCount !== 1 ? 's' : ''}</p>
         </motion.div>
 
