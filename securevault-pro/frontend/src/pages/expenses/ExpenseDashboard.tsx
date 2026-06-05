@@ -392,9 +392,6 @@ export default function ExpenseDashboardPage() {
       <ReportExportModal
         open={exportModalOpen}
         onClose={() => setExportModalOpen(false)}
-        expenses={expenses}
-        summary={summary}
-        budgets={budgets}
         currency={currency}
         period={{ year: now.getFullYear(), month: now.getMonth() + 1 }}
       />

@@ -11,6 +11,7 @@ import { MonthlyBarChart } from '../../components/charts/MonthlyBarChart';
 import { PaymentMethodDonutChart } from '../../components/charts/PaymentMethodDonutChart';
 import { BudgetVsActualChart } from '../../components/charts/BudgetVsActualChart';
 import { PageLoader } from '../../components/ui/LoadingSpinner';
+import { ReportExportModal } from '../../components/ui/ReportExportModal';
 import { expensesService, reportsService } from '../../services/expenses.service';
 import {
   formatCurrency, EXPENSE_CATEGORY_LABELS, EXPENSE_CATEGORY_COLORS,
@@ -24,12 +25,6 @@ const now = new Date();
 type ReportType = 'monthly' | 'yearly' | 'category' | 'payment' | 'budget' | 'compare';
 const selectCls = 'px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all';
 
-function downloadCsv(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
-}
-
 export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState<ReportType>('monthly');
   const [loading, setLoading]     = useState(false);
@@ -39,7 +34,8 @@ export default function ReportsPage() {
   const [year2,  setYear2]        = useState(now.getFullYear() - 1);
   const [month2, setMonth2]       = useState(now.getMonth() + 1);
   const [budgets, setBudgets]     = useState<any[]>([]);
-  const [exporting, setExporting] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const { currency } = useCurrencyStore();
 
   const load = async () => {
     setLoading(true);
@@ -63,16 +59,10 @@ export default function ReportsPage() {
 
   useEffect(() => { load(); }, [activeTab, year, month, year2, month2]);
 
-  const handleExport = async () => {
-    setExporting(true);
-    try {
-      const params: Record<string, string> = { year: String(year) };
-      if (activeTab === 'monthly' || activeTab === 'budget') params.month = String(month);
-      const blob = await expensesService.exportCsv(params);
-      downloadCsv(blob, `report-${year}.csv`);
-      toast('Exported', 'success');
-    } catch { toast('Export failed', 'error'); } finally { setExporting(false); }
-  };
+  // Month-scoped tabs export a single month; the rest export the full year.
+  const exportPeriod = (activeTab === 'monthly' || activeTab === 'budget' || activeTab === 'compare')
+    ? { year, month }
+    : { year };
 
   const TABS: { id: ReportType; label: string; icon: any }[] = [
     { id: 'monthly',  label: 'Monthly',        icon: Calendar   },
@@ -92,7 +82,7 @@ export default function ReportsPage() {
         action={
           <div className="flex gap-2">
             <Button variant="outline" size="sm" leftIcon={Printer} onClick={() => window.print()}>Print</Button>
-            <Button variant="outline" size="sm" leftIcon={Download} onClick={handleExport} loading={exporting}>Export CSV</Button>
+            <Button variant="outline" size="sm" leftIcon={Download} onClick={() => setExportOpen(true)}>Download Report</Button>
           </div>
         }
       />
@@ -180,6 +170,13 @@ export default function ReportsPage() {
           )}
         </div>
       </div>
+
+      <ReportExportModal
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        currency={currency}
+        period={exportPeriod}
+      />
     </div>
   );
 }

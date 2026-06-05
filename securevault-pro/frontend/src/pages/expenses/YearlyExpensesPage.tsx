@@ -9,18 +9,11 @@ import { CategoryPieChart } from '../../components/charts/CategoryPieChart';
 import { PaymentMethodDonutChart } from '../../components/charts/PaymentMethodDonutChart';
 import { MonthComparisonChart } from '../../components/charts/MonthComparisonChart';
 import { PageLoader } from '../../components/ui/LoadingSpinner';
+import { ReportExportModal } from '../../components/ui/ReportExportModal';
 import { expensesService } from '../../services/expenses.service';
 import { formatCurrency, EXPENSE_CATEGORY_LABELS, MONTH_SHORT } from '../../utils/format';
 import { useCurrencyStore } from '../../store/currencyStore';
 import { cn } from '../../utils/cn';
-import { toast } from '../../hooks/useToast';
-
-function downloadCsv(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
-}
 
 export default function YearlyExpensesPage() {
   const { currency } = useCurrencyStore();
@@ -31,7 +24,7 @@ export default function YearlyExpensesPage() {
   const [data,  setData]  = useState<any>(null);
   const [compareData, setCompareData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [exporting, setExporting] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -44,15 +37,6 @@ export default function YearlyExpensesPage() {
     }).finally(() => setLoading(false));
   }, [year]);
 
-  const handleExport = async () => {
-    setExporting(true);
-    try {
-      const blob = await expensesService.exportCsv({ year: String(year) });
-      downloadCsv(blob, `expenses-${year}.csv`);
-      toast('Exported successfully', 'success');
-    } catch { toast('Export failed', 'error'); } finally { setExporting(false); }
-  };
-
   return (
     <div className="space-y-5">
       <PageHeader
@@ -60,8 +44,8 @@ export default function YearlyExpensesPage() {
         description={`Complete financial summary for ${year}`}
         icon={BarChart3}
         action={
-          <Button variant="outline" size="sm" leftIcon={Download} onClick={handleExport} loading={exporting}>
-            Export CSV
+          <Button variant="outline" size="sm" leftIcon={Download} onClick={() => setExportOpen(true)}>
+            Download Report
           </Button>
         }
       />
@@ -223,6 +207,13 @@ export default function YearlyExpensesPage() {
           </div>
         </>
       )}
+
+      <ReportExportModal
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        currency={currency}
+        period={{ year }}
+      />
     </div>
   );
 }

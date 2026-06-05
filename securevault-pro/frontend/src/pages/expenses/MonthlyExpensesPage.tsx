@@ -14,6 +14,7 @@ import { PaymentMethodDonutChart } from '../../components/charts/PaymentMethodDo
 import { DailyTrendChart } from '../../components/charts/DailyTrendChart';
 import { PageLoader } from '../../components/ui/LoadingSpinner';
 import { ConfirmDialog } from '../../components/ui/Modal';
+import { ReportExportModal } from '../../components/ui/ReportExportModal';
 import { expensesService } from '../../services/expenses.service';
 import {
   formatCurrency, formatDate,
@@ -29,13 +30,6 @@ import { cn } from '../../utils/cn';
 import type { Expense, ExpenseCategory, PaymentMethod, ExpenseStatus } from '../../types';
 
 const selectCls = 'w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all';
-
-function downloadCsv(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
-}
 
 export default function MonthlyExpensesPage() {
   const { currency } = useCurrencyStore();
@@ -57,7 +51,7 @@ export default function MonthlyExpensesPage() {
   const [sortOrder,     setSortOrder]     = useState<'asc' | 'desc'>('desc');
 
   const [deleteTarget, setDeleteTarget] = useState<Expense | null>(null);
-  const [exporting, setExporting] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -90,15 +84,6 @@ export default function MonthlyExpensesPage() {
     } catch (err) { toast(getErrorMessage(err), 'error'); }
   };
 
-  const handleExport = async () => {
-    setExporting(true);
-    try {
-      const blob = await expensesService.exportCsv({ year: String(year), month: String(month) });
-      downloadCsv(blob, `expenses-${year}-${String(month).padStart(2, '0')}.csv`);
-      toast('Exported successfully', 'success');
-    } catch { toast('Export failed', 'error'); } finally { setExporting(false); }
-  };
-
   const isCurrent  = year === now.getFullYear() && month === now.getMonth() + 1;
   const daysInMonth = new Date(year, month, 0).getDate();
 
@@ -127,7 +112,7 @@ export default function MonthlyExpensesPage() {
         icon={Calendar}
         action={
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" leftIcon={Download} onClick={handleExport} loading={exporting}>CSV</Button>
+            <Button variant="outline" size="sm" leftIcon={Download} onClick={() => setExportOpen(true)}>Report</Button>
             <Button
               variant="outline" size="sm"
               leftIcon={Filter}
@@ -441,6 +426,13 @@ export default function MonthlyExpensesPage() {
         confirmLabel="Delete"
         variant="destructive"
         icon={Trash2}
+      />
+
+      <ReportExportModal
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        currency={currency}
+        period={{ year, month }}
       />
     </div>
   );
