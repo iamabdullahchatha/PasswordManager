@@ -322,6 +322,33 @@ export function ReportExportModal({ open, onClose, currency, period }: Props) {
   );
 }
 
+/* ── Brand mark (inline SVG — renders crisp & centered in html2canvas) ──────── */
+function ShieldMark({ size = 30 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ display: 'block' }}
+    >
+      <path
+        d="M12 2.2 4.6 5.1v6.2c0 4.6 3.1 7.9 7.4 9.4 4.3-1.5 7.4-4.8 7.4-9.4V5.1L12 2.2z"
+        fill="#ffffff"
+      />
+      <path
+        d="M9.1 12.1 11.1 14.1 15 10.2"
+        stroke="#1e40af"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+    </svg>
+  );
+}
+
 /* ── Report Template (rendered off-screen, captured by html2canvas) ─────────── */
 function ReportTemplate({
   expenses, stats, currency, periodLabel, isYearly, generated, fmt,
@@ -347,26 +374,26 @@ function ReportTemplate({
   const overflow = expenses.length - rows.length;
 
   return (
-    <div style={{ background: '#fff', minHeight: '100%', color: '#0f172a' }}>
+    <div style={{ background: '#fff', minHeight: '100%', color: '#0f172a', lineHeight: 1.5 }}>
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #1e40af 50%, #3730a3 100%)', padding: '36px 48px 32px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid rgba(255,255,255,0.3)' }}>
-              <span style={{ fontSize: 26 }}>🛡️</span>
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid rgba(255,255,255,0.3)', flexShrink: 0 }}>
+              <ShieldMark size={30} />
             </div>
             <div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>SecureVault Pro</div>
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2 }}>
+              <div style={{ fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.5px', lineHeight: 1.3 }}>SecureVault Pro</div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2, lineHeight: 1.4 }}>
                 {isYearly ? 'Annual' : 'Monthly'} Expense Report · {periodLabel}
               </div>
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 1 }}>Powered by</div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: '#fff', marginTop: 2 }}>WebCore Solutions UAE</div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginTop: 4 }}>Generated: {generated}</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 1, lineHeight: 1.4 }}>Powered by</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: '#fff', marginTop: 2, lineHeight: 1.4 }}>WebCore Solutions UAE</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginTop: 4, lineHeight: 1.4 }}>Generated: {generated}</div>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 6, marginTop: 24 }}>
@@ -421,7 +448,7 @@ function ReportTemplate({
                 <div key={cat} style={{ background: '#f8fafc', borderRadius: 10, padding: '12px 14px', border: '1px solid #e2e8f0' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                     <div style={{ width: 10, height: 10, borderRadius: '50%', background: color, flexShrink: 0 }} />
-                    <span style={{ fontSize: 11, fontWeight: 600, color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{EXPENSE_CATEGORY_LABELS[cat] ?? cat}</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: '#475569', lineHeight: 1.6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{EXPENSE_CATEGORY_LABELS[cat] ?? cat}</span>
                   </div>
                   <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>{fmt(data.total)}</div>
                   <div style={{ marginTop: 6, height: 4, background: '#e2e8f0', borderRadius: 99 }}>
@@ -463,7 +490,7 @@ function ReportTemplate({
         <div style={{ borderRadius: 12, border: '1.5px solid #e2e8f0', overflow: 'hidden' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '28px 1fr 100px 80px 90px 80px 80px 90px', background: 'linear-gradient(90deg,#1e3a5f,#1e40af)', padding: '10px 16px', gap: 8 }}>
             {['#', 'Title / Vendor', 'Amount', 'Currency', 'Category', 'Method', 'Status', 'Date'].map((h) => (
-              <div key={h} style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.85)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</div>
+              <div key={h} style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.85)', textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1.5 }}>{h}</div>
             ))}
           </div>
 
@@ -477,20 +504,20 @@ function ReportTemplate({
                 <div key={exp.id} style={{ display: 'grid', gridTemplateColumns: '28px 1fr 100px 80px 90px 80px 80px 90px', padding: '9px 16px', gap: 8, background: i % 2 === 0 ? '#fff' : '#f8fafc', borderTop: '1px solid #f1f5f9', alignItems: 'center' }}>
                   <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600 }}>{i + 1}</div>
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exp.title}</div>
-                    {exp.vendor && <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exp.vendor}</div>}
+                    <div style={{ fontSize: 12, fontWeight: 600, color: '#0f172a', lineHeight: 1.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exp.title}</div>
+                    {exp.vendor && <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 1, lineHeight: 1.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exp.vendor}</div>}
                   </div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{formatCurrency(Number(exp.amount), exp.currency)}</div>
-                  <div style={{ fontSize: 11, color: '#64748b' }}>{exp.currency}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#0f172a', lineHeight: 1.5 }}>{formatCurrency(Number(exp.amount), exp.currency)}</div>
+                  <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.5 }}>{exp.currency}</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                     <div style={{ width: 7, height: 7, borderRadius: '50%', background: catColor, flexShrink: 0 }} />
-                    <span style={{ fontSize: 10, color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{EXPENSE_CATEGORY_LABELS[exp.category] ?? exp.category}</span>
+                    <span style={{ fontSize: 10, color: '#475569', lineHeight: 1.6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{EXPENSE_CATEGORY_LABELS[exp.category] ?? exp.category}</span>
                   </div>
-                  <div style={{ fontSize: 10, color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{PAYMENT_METHOD_LABELS[exp.paymentMethod] ?? exp.paymentMethod}</div>
+                  <div style={{ fontSize: 10, color: '#64748b', lineHeight: 1.6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{PAYMENT_METHOD_LABELS[exp.paymentMethod] ?? exp.paymentMethod}</div>
                   <div>
-                    <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 99, background: `${statusColor}18`, color: statusColor }}>{EXPENSE_STATUS_LABELS[exp.status] ?? exp.status}</span>
+                    <span style={{ display: 'inline-block', fontSize: 10, fontWeight: 600, lineHeight: 1.5, padding: '2px 7px', borderRadius: 99, background: `${statusColor}18`, color: statusColor }}>{EXPENSE_STATUS_LABELS[exp.status] ?? exp.status}</span>
                   </div>
-                  <div style={{ fontSize: 10, color: '#64748b' }}>{formatDate(exp.date)}</div>
+                  <div style={{ fontSize: 10, color: '#64748b', lineHeight: 1.5 }}>{formatDate(exp.date)}</div>
                 </div>
               );
             })
@@ -506,15 +533,17 @@ function ReportTemplate({
       {/* ── Footer ─────────────────────────────────────────────────────────── */}
       <div style={{ margin: '28px 48px 0', padding: '18px 24px', background: 'linear-gradient(135deg, #1e3a5f, #1e40af)', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>🛡️</div>
+          <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <ShieldMark size={18} />
+          </div>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>SecureVault Pro</div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', marginTop: 1 }}>Financial Expense Report · Confidential</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', lineHeight: 1.4 }}>SecureVault Pro</div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', marginTop: 1, lineHeight: 1.4 }}>Financial Expense Report · Confidential</div>
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>WebCore Solutions UAE</div>
-          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', marginTop: 1 }}>© {new Date().getFullYear()} All Rights Reserved</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#fff', lineHeight: 1.4 }}>WebCore Solutions UAE</div>
+          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', marginTop: 1, lineHeight: 1.4 }}>© {new Date().getFullYear()} All Rights Reserved</div>
         </div>
       </div>
 
