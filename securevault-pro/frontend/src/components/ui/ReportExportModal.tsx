@@ -446,9 +446,9 @@ function ReportTemplate({
               const pct   = Math.round((data.total / categoryTotal) * 100);
               return (
                 <div key={cat} style={{ background: '#f8fafc', borderRadius: 10, padding: '12px 14px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: color, flexShrink: 0 }} />
-                    <span style={{ fontSize: 11, fontWeight: 600, color: '#475569', lineHeight: 1.6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{EXPENSE_CATEGORY_LABELS[cat] ?? cat}</span>
+                  <div style={{ marginBottom: 8, whiteSpace: 'nowrap', overflow: 'hidden' }}>
+                    <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: color, marginRight: 8, verticalAlign: 'middle' }} />
+                    <span style={{ display: 'inline-block', maxWidth: 'calc(100% - 20px)', fontSize: 11, fontWeight: 600, color: '#475569', verticalAlign: 'middle', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{EXPENSE_CATEGORY_LABELS[cat] ?? cat}</span>
                   </div>
                   <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>{fmt(data.total)}</div>
                   <div style={{ marginTop: 6, height: 4, background: '#e2e8f0', borderRadius: 99 }}>
@@ -487,46 +487,80 @@ function ReportTemplate({
           Expense Transactions ({expenses.length})
         </div>
 
+        {/* Real <table> markup — html2canvas lays out table cells correctly,
+            unlike flex/grid where it clips the tops of centred text. */}
         <div style={{ borderRadius: 12, border: '1.5px solid #e2e8f0', overflow: 'hidden' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '28px 1fr 100px 80px 90px 80px 80px 90px', background: 'linear-gradient(90deg,#1e3a5f,#1e40af)', padding: '10px 16px', gap: 8 }}>
-            {['#', 'Title / Vendor', 'Amount', 'Currency', 'Category', 'Method', 'Status', 'Date'].map((h) => (
-              <div key={h} style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.85)', textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1.5 }}>{h}</div>
-            ))}
-          </div>
-
-          {rows.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '28px', color: '#94a3b8', fontSize: 13 }}>No expenses for this period</div>
-          ) : (
-            rows.map((exp, i) => {
-              const statusColor = EXPENSE_STATUS_COLORS[exp.status] ?? '#6b7280';
-              const catColor    = EXPENSE_CATEGORY_COLORS[exp.category] ?? '#6b7280';
-              return (
-                <div key={exp.id} style={{ display: 'grid', gridTemplateColumns: '28px 1fr 100px 80px 90px 80px 80px 90px', padding: '9px 16px', gap: 8, background: i % 2 === 0 ? '#fff' : '#f8fafc', borderTop: '1px solid #f1f5f9', alignItems: 'center' }}>
-                  <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600 }}>{i + 1}</div>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: '#0f172a', lineHeight: 1.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exp.title}</div>
-                    {exp.vendor && <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 1, lineHeight: 1.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exp.vendor}</div>}
-                  </div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: '#0f172a', lineHeight: 1.5 }}>{formatCurrency(Number(exp.amount), exp.currency)}</div>
-                  <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.5 }}>{exp.currency}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                    <div style={{ width: 7, height: 7, borderRadius: '50%', background: catColor, flexShrink: 0 }} />
-                    <span style={{ fontSize: 10, color: '#475569', lineHeight: 1.6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{EXPENSE_CATEGORY_LABELS[exp.category] ?? exp.category}</span>
-                  </div>
-                  <div style={{ fontSize: 10, color: '#64748b', lineHeight: 1.6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{PAYMENT_METHOD_LABELS[exp.paymentMethod] ?? exp.paymentMethod}</div>
-                  <div>
-                    <span style={{ display: 'inline-block', fontSize: 10, fontWeight: 600, lineHeight: 1.5, padding: '2px 7px', borderRadius: 99, background: `${statusColor}18`, color: statusColor }}>{EXPENSE_STATUS_LABELS[exp.status] ?? exp.status}</span>
-                  </div>
-                  <div style={{ fontSize: 10, color: '#64748b', lineHeight: 1.5 }}>{formatDate(exp.date)}</div>
-                </div>
-              );
-            })
-          )}
-          {overflow > 0 && (
-            <div style={{ textAlign: 'center', padding: '12px', fontSize: 11, color: '#94a3b8', background: '#f8fafc', borderTop: '1px solid #f1f5f9' }}>
-              + {overflow} more transaction{overflow !== 1 ? 's' : ''} not shown (showing first {MAX_ROWS})
-            </div>
-          )}
+          <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+            <colgroup>
+              <col style={{ width: 34 }} />
+              <col />
+              <col style={{ width: 104 }} />
+              <col style={{ width: 70 }} />
+              <col style={{ width: 124 }} />
+              <col style={{ width: 92 }} />
+              <col style={{ width: 86 }} />
+              <col style={{ width: 92 }} />
+            </colgroup>
+            <thead>
+              <tr style={{ background: 'linear-gradient(90deg,#1e3a5f,#1e40af)' }}>
+                {['#', 'Title / Vendor', 'Amount', 'Currency', 'Category', 'Method', 'Status', 'Date'].map((h) => (
+                  <th
+                    key={h}
+                    style={{
+                      textAlign: h === 'Amount' ? 'right' as const : 'left' as const,
+                      padding: '11px 14px', fontSize: 10, fontWeight: 700,
+                      color: 'rgba(255,255,255,0.9)', textTransform: 'uppercase',
+                      letterSpacing: '0.5px', whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.length === 0 ? (
+                <tr>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '28px', color: '#94a3b8', fontSize: 13 }}>
+                    No expenses for this period
+                  </td>
+                </tr>
+              ) : (
+                rows.map((exp, i) => {
+                  const statusColor = EXPENSE_STATUS_COLORS[exp.status] ?? '#6b7280';
+                  const catColor    = EXPENSE_CATEGORY_COLORS[exp.category] ?? '#6b7280';
+                  const td = { padding: '9px 14px', verticalAlign: 'middle' as const, borderTop: '1px solid #f1f5f9' };
+                  return (
+                    <tr key={exp.id} style={{ background: i % 2 === 0 ? '#fff' : '#f8fafc' }}>
+                      <td style={{ ...td, fontSize: 10, color: '#94a3b8', fontWeight: 600 }}>{i + 1}</td>
+                      <td style={{ ...td, overflow: 'hidden' }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exp.title}</div>
+                        {exp.vendor && <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exp.vendor}</div>}
+                      </td>
+                      <td style={{ ...td, textAlign: 'right', fontSize: 12, fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap' }}>{formatCurrency(Number(exp.amount), exp.currency)}</td>
+                      <td style={{ ...td, fontSize: 11, color: '#64748b' }}>{exp.currency}</td>
+                      <td style={{ ...td, fontSize: 10, color: '#475569', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                        <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: catColor, marginRight: 5, verticalAlign: 'middle' }} />
+                        <span style={{ verticalAlign: 'middle' }}>{EXPENSE_CATEGORY_LABELS[exp.category] ?? exp.category}</span>
+                      </td>
+                      <td style={{ ...td, fontSize: 10, color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{PAYMENT_METHOD_LABELS[exp.paymentMethod] ?? exp.paymentMethod}</td>
+                      <td style={{ ...td }}>
+                        <span style={{ display: 'inline-block', fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 99, background: `${statusColor}18`, color: statusColor, whiteSpace: 'nowrap' }}>{EXPENSE_STATUS_LABELS[exp.status] ?? exp.status}</span>
+                      </td>
+                      <td style={{ ...td, fontSize: 10, color: '#64748b', whiteSpace: 'nowrap' }}>{formatDate(exp.date)}</td>
+                    </tr>
+                  );
+                })
+              )}
+              {overflow > 0 && (
+                <tr>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '12px', fontSize: 11, color: '#94a3b8', background: '#f8fafc', borderTop: '1px solid #f1f5f9' }}>
+                    + {overflow} more transaction{overflow !== 1 ? 's' : ''} not shown (showing first {MAX_ROWS})
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
