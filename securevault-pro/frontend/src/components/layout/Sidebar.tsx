@@ -47,6 +47,7 @@ const NAV: NavItem[] = [
     ],
   },
   { label: 'Reports', href: '/reports', icon: FileText },
+  { label: 'Calendar', href: '/calendar', icon: Calendar },
   { label: 'Users', href: '/users', icon: Users, roles: ['ADMIN', 'SUPER_ADMIN'] },
   { label: 'Activity Logs', href: '/activity-logs', icon: Activity },
 ];

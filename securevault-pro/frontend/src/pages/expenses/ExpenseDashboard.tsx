@@ -4,8 +4,9 @@ import { motion } from 'framer-motion';
 import {
   Plus, DollarSign, TrendingUp, TrendingDown, Calendar, BarChart3, Trash2, Edit,
   ArrowRight, Receipt, PieChart, Wallet, RefreshCw, Clock, AlertTriangle,
-  ArrowUpRight, ArrowDownRight, Download, Upload, Target,
+  ArrowUpRight, ArrowDownRight, Download, Target,
 } from 'lucide-react';
+import { ReportExportModal } from '../../components/ui/ReportExportModal';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { StatCard } from '../../components/ui/StatCard';
 import { Button } from '../../components/ui/Button';
@@ -27,13 +28,6 @@ import { getErrorMessage } from '../../services/api';
 import { cn } from '../../utils/cn';
 import type { Expense, Budget } from '../../types';
 
-function downloadCsv(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const a   = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
-}
-
 export default function ExpenseDashboardPage() {
   const { currency } = useCurrencyStore();
   const fmt = (amount: number) => formatCurrency(amount, currency);
@@ -43,7 +37,7 @@ export default function ExpenseDashboardPage() {
   const [budgets, setBudgets]   = useState<Budget[]>([]);
   const [loading, setLoading]   = useState(true);
   const [deleteTarget, setDeleteTarget] = useState<Expense | null>(null);
-  const [exporting, setExporting] = useState(false);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
 
   const now = new Date();
 
@@ -73,18 +67,6 @@ export default function ExpenseDashboardPage() {
     } catch (err) { toast(getErrorMessage(err), 'error'); }
   };
 
-  const handleExport = async () => {
-    setExporting(true);
-    try {
-      const blob = await expensesService.exportCsv({
-        year:  String(now.getFullYear()),
-        month: String(now.getMonth() + 1),
-      });
-      downloadCsv(blob, `expenses-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}.csv`);
-      toast('Exported successfully', 'success');
-    } catch { toast('Export failed', 'error'); } finally { setExporting(false); }
-  };
-
   if (loading) return <PageLoader />;
 
   const monthlyTotal   = summary?.monthly?.total   ?? 0;
@@ -108,8 +90,8 @@ export default function ExpenseDashboardPage() {
         action={
           <div className="flex flex-wrap gap-2">
             <CurrencySelector />
-            <Button variant="outline" size="sm" leftIcon={Download} onClick={handleExport} loading={exporting}>
-              Export CSV
+            <Button variant="outline" size="sm" leftIcon={Download} onClick={() => setExportModalOpen(true)}>
+              Download Report
             </Button>
             <Link to="/expenses/monthly">
               <Button variant="outline" size="sm" leftIcon={Calendar}>Monthly</Button>
@@ -405,6 +387,16 @@ export default function ExpenseDashboardPage() {
         confirmLabel="Delete"
         variant="destructive"
         icon={Trash2}
+      />
+
+      <ReportExportModal
+        open={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
+        expenses={expenses}
+        summary={summary}
+        budgets={budgets}
+        currency={currency}
+        period={{ year: now.getFullYear(), month: now.getMonth() + 1 }}
       />
     </div>
   );

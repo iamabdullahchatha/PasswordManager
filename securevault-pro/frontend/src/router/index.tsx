@@ -68,6 +68,9 @@ import SecuritySettingsPage from '../pages/settings/SecuritySettings';
 import ActivityLogsPage from '../pages/ActivityLogsPage';
 import NotificationsPage from '../pages/NotificationsPage';
 
+// Calendar
+import CalendarPage from '../pages/calendar/CalendarPage';
+
 export const router = createBrowserRouter([
   { path: '/login',           element: <LoginPage />,          errorElement: <RouteErrorBoundary /> },
   { path: '/register',        element: <RegisterPage />,       errorElement: <RouteErrorBoundary /> },
@@ -117,6 +120,9 @@ export const router = createBrowserRouter([
       // ── Settings ───────────────────────────────────────────────────────
       { path: 'settings/profile',  element: <ProfileSettingsPage /> },
       { path: 'settings/security', element: <SecuritySettingsPage /> },
+
+      // ── Calendar ───────────────────────────────────────────────────────
+      { path: 'calendar', element: <CalendarPage /> },
 
       // ── Logs / Notifications ───────────────────────────────────────────
       { path: 'activity-logs', element: <ActivityLogsPage /> },
