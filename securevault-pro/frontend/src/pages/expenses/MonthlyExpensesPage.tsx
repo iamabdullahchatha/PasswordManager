@@ -9,6 +9,7 @@ import { PageHeader } from '../../components/ui/PageHeader';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { Input } from '../../components/ui/Input';
+import { SelectMenu } from '../../components/ui/SelectMenu';
 import { CategoryPieChart } from '../../components/charts/CategoryPieChart';
 import { PaymentMethodDonutChart } from '../../components/charts/PaymentMethodDonutChart';
 import { DailyTrendChart } from '../../components/charts/DailyTrendChart';
@@ -28,8 +29,6 @@ import { toast } from '../../hooks/useToast';
 import { getErrorMessage } from '../../services/api';
 import { cn } from '../../utils/cn';
 import type { Expense, ExpenseCategory, PaymentMethod, ExpenseStatus } from '../../types';
-
-const selectCls = 'w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all';
 
 export default function MonthlyExpensesPage() {
   const { currency } = useCurrencyStore();
@@ -165,20 +164,33 @@ export default function MonthlyExpensesPage() {
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
-              <select className={selectCls} value={filterCat} onChange={(e) => setFilterCat(e.target.value)}>
-                <option value="">All Categories</option>
-                {Object.entries(EXPENSE_CATEGORY_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-              </select>
-              <select className={selectCls} value={filterMethod} onChange={(e) => setFilterMethod(e.target.value)}>
-                <option value="">All Payment Methods</option>
-                {Object.entries(PAYMENT_METHOD_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-              </select>
-              <select className={selectCls} value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-                <option value="">All Statuses</option>
-                {['PAID', 'PENDING', 'CANCELLED'].map((s) => (
-                  <option key={s} value={s}>{EXPENSE_STATUS_LABELS[s]}</option>
-                ))}
-              </select>
+              <SelectMenu
+                ariaLabel="Filter by category"
+                value={filterCat}
+                onChange={setFilterCat}
+                options={[
+                  { value: '', label: 'All Categories' },
+                  ...Object.entries(EXPENSE_CATEGORY_LABELS).map(([v, l]) => ({ value: v, label: l })),
+                ]}
+              />
+              <SelectMenu
+                ariaLabel="Filter by payment method"
+                value={filterMethod}
+                onChange={setFilterMethod}
+                options={[
+                  { value: '', label: 'All Payment Methods' },
+                  ...Object.entries(PAYMENT_METHOD_LABELS).map(([v, l]) => ({ value: v, label: l })),
+                ]}
+              />
+              <SelectMenu
+                ariaLabel="Filter by status"
+                value={filterStatus}
+                onChange={setFilterStatus}
+                options={[
+                  { value: '', label: 'All Statuses' },
+                  ...['PAID', 'PENDING', 'CANCELLED'].map((s) => ({ value: s, label: EXPENSE_STATUS_LABELS[s] })),
+                ]}
+              />
             </div>
             {hasFilters && (
               <button

@@ -12,6 +12,7 @@ import {
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { SelectMenu } from '../../components/ui/SelectMenu';
 import { PasswordStrength } from '../../components/ui/PasswordStrength';
 import { Badge } from '../../components/ui/Badge';
 import { vaultService } from '../../services/vault.service';
@@ -64,7 +65,6 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const iCls = 'w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm hover:border-slate-300';
-const selectCls = `${iCls} appearance-none`;
 
 function Section({ title, icon: Icon, children, defaultOpen = true }: {
   title: string;
@@ -223,15 +223,15 @@ export default function AddEmailPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Platform / Provider" error={errors.provider?.message}>
-                  <select className={selectCls} {...register('provider')}>
-                    {PROVIDER_GROUPS.map((group) => (
-                      <optgroup key={group.label} label={group.label}>
-                        {group.providers.map((p) => (
-                          <option key={p} value={p}>{PROVIDER_LABELS[p]}</option>
-                        ))}
-                      </optgroup>
-                    ))}
-                  </select>
+                  <SelectMenu
+                    ariaLabel="Platform / Provider"
+                    value={provider}
+                    onChange={(v) => setValue('provider', v as FormData['provider'], { shouldValidate: true })}
+                    groups={PROVIDER_GROUPS.map((group) => ({
+                      label: group.label,
+                      options: group.providers.map((p) => ({ value: p, label: PROVIDER_LABELS[p] })),
+                    }))}
+                  />
                 </Field>
 
                 <Field label="Platform Name" error={errors.platformName?.message} required>
@@ -249,11 +249,12 @@ export default function AddEmailPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Importance */}
                 <Field label="Importance Level" error={errors.importanceLevel?.message}>
-                  <select className={selectCls} {...register('importanceLevel')}>
-                    {IMPORTANCE_OPTS.map((o) => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                  </select>
+                  <SelectMenu
+                    ariaLabel="Importance Level"
+                    value={watch('importanceLevel')}
+                    onChange={(v) => setValue('importanceLevel', v as FormData['importanceLevel'], { shouldValidate: true })}
+                    options={IMPORTANCE_OPTS.map((o) => ({ value: o.value, label: o.label, description: o.desc }))}
+                  />
                 </Field>
 
                 {/* Category */}

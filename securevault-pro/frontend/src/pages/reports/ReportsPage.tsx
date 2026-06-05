@@ -11,6 +11,7 @@ import { MonthlyBarChart } from '../../components/charts/MonthlyBarChart';
 import { PaymentMethodDonutChart } from '../../components/charts/PaymentMethodDonutChart';
 import { BudgetVsActualChart } from '../../components/charts/BudgetVsActualChart';
 import { PageLoader } from '../../components/ui/LoadingSpinner';
+import { SelectMenu } from '../../components/ui/SelectMenu';
 import { ReportExportModal } from '../../components/ui/ReportExportModal';
 import { expensesService, reportsService } from '../../services/expenses.service';
 import {
@@ -23,7 +24,8 @@ import { toast } from '../../hooks/useToast';
 
 const now = new Date();
 type ReportType = 'monthly' | 'yearly' | 'category' | 'payment' | 'budget' | 'compare';
-const selectCls = 'px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all';
+const MONTH_OPTS = MONTH_NAMES.map((n, i) => ({ value: String(i + 1), label: n }));
+const YEAR_OPTS  = [...Array(5)].map((_, i) => now.getFullYear() - i).map((y) => ({ value: String(y), label: String(y) }));
 
 export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState<ReportType>('monthly');
@@ -110,36 +112,22 @@ export default function ReportsPage() {
         <div className="p-4 border-b border-slate-100 bg-slate-50/40 flex flex-wrap gap-3 items-center">
           {(activeTab === 'monthly' || activeTab === 'budget') && (
             <>
-              <select className={selectCls} value={month} onChange={(e) => setMonth(+e.target.value)}>
-                {MONTH_NAMES.map((n, i) => <option key={i + 1} value={i + 1}>{n}</option>)}
-              </select>
-              <select className={selectCls} value={year} onChange={(e) => setYear(+e.target.value)}>
-                {[...Array(5)].map((_, i) => now.getFullYear() - i).map((y) => <option key={y} value={y}>{y}</option>)}
-              </select>
+              <SelectMenu size="sm" className="w-40" ariaLabel="Month" value={String(month)} onChange={(v) => setMonth(+v)} options={MONTH_OPTS} />
+              <SelectMenu size="sm" className="w-28" ariaLabel="Year"  value={String(year)}  onChange={(v) => setYear(+v)}  options={YEAR_OPTS} />
             </>
           )}
           {(activeTab === 'yearly' || activeTab === 'category' || activeTab === 'payment') && (
-            <select className={selectCls} value={year} onChange={(e) => setYear(+e.target.value)}>
-              {[...Array(5)].map((_, i) => now.getFullYear() - i).map((y) => <option key={y} value={y}>{y}</option>)}
-            </select>
+            <SelectMenu size="sm" className="w-28" ariaLabel="Year" value={String(year)} onChange={(v) => setYear(+v)} options={YEAR_OPTS} />
           )}
           {activeTab === 'compare' && (
             <div className="flex items-center gap-3 flex-wrap">
               <span className="text-xs font-semibold text-slate-600">Period 1:</span>
-              <select className={selectCls} value={month} onChange={(e) => setMonth(+e.target.value)}>
-                {MONTH_NAMES.map((n, i) => <option key={i + 1} value={i + 1}>{n}</option>)}
-              </select>
-              <select className={selectCls} value={year} onChange={(e) => setYear(+e.target.value)}>
-                {[...Array(5)].map((_, i) => now.getFullYear() - i).map((y) => <option key={y} value={y}>{y}</option>)}
-              </select>
+              <SelectMenu size="sm" className="w-40" ariaLabel="Period 1 month" value={String(month)} onChange={(v) => setMonth(+v)} options={MONTH_OPTS} />
+              <SelectMenu size="sm" className="w-28" ariaLabel="Period 1 year"  value={String(year)}  onChange={(v) => setYear(+v)}  options={YEAR_OPTS} />
               <span className="text-slate-300">vs</span>
               <span className="text-xs font-semibold text-slate-600">Period 2:</span>
-              <select className={selectCls} value={month2} onChange={(e) => setMonth2(+e.target.value)}>
-                {MONTH_NAMES.map((n, i) => <option key={i + 1} value={i + 1}>{n}</option>)}
-              </select>
-              <select className={selectCls} value={year2} onChange={(e) => setYear2(+e.target.value)}>
-                {[...Array(5)].map((_, i) => now.getFullYear() - i).map((y) => <option key={y} value={y}>{y}</option>)}
-              </select>
+              <SelectMenu size="sm" className="w-40" ariaLabel="Period 2 month" value={String(month2)} onChange={(v) => setMonth2(+v)} options={MONTH_OPTS} />
+              <SelectMenu size="sm" className="w-28" ariaLabel="Period 2 year"  value={String(year2)}  onChange={(v) => setYear2(+v)}  options={YEAR_OPTS} />
             </div>
           )}
           <button onClick={load} className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 transition-colors">

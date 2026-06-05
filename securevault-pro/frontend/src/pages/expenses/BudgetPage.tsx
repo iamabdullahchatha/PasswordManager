@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Button } from '../../components/ui/Button';
+import { SelectMenu } from '../../components/ui/SelectMenu';
 import { ConfirmDialog } from '../../components/ui/Modal';
 import { BudgetVsActualChart } from '../../components/charts/BudgetVsActualChart';
 import { PageLoader } from '../../components/ui/LoadingSpinner';
@@ -115,12 +116,15 @@ export default function BudgetPage() {
       <div className="bg-white rounded-2xl border border-slate-200 shadow-card p-6">
         <p className="text-sm font-bold text-slate-700 mb-4">Add / Update Budget</p>
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-          <select className={selectCls} value={newCategory} onChange={(e) => setNewCategory(e.target.value)}>
-            <option value="">Overall Budget</option>
-            {Object.entries(EXPENSE_CATEGORY_LABELS).map(([v, l]) => (
-              <option key={v} value={v}>{l}</option>
-            ))}
-          </select>
+          <SelectMenu
+            ariaLabel="Budget category"
+            value={newCategory}
+            onChange={setNewCategory}
+            options={[
+              { value: '', label: 'Overall Budget' },
+              ...Object.entries(EXPENSE_CATEGORY_LABELS).map(([v, l]) => ({ value: v, label: l })),
+            ]}
+          />
           <input
             type="number"
             min="1"
@@ -130,9 +134,12 @@ export default function BudgetPage() {
             value={newAmount}
             onChange={(e) => setNewAmount(e.target.value)}
           />
-          <select className={selectCls} value={newCurrency} onChange={(e) => setNewCurrency(e.target.value)}>
-            {['USD', 'EUR', 'GBP', 'PKR', 'CAD', 'AUD', 'INR', 'AED'].map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
+          <SelectMenu
+            ariaLabel="Budget currency"
+            value={newCurrency}
+            onChange={setNewCurrency}
+            options={['USD', 'EUR', 'GBP', 'PKR', 'CAD', 'AUD', 'INR', 'AED'].map((c) => ({ value: c, label: c }))}
+          />
           <Button variant="primary" leftIcon={Save} onClick={handleSave} loading={saving} className="w-full">
             Save Budget
           </Button>

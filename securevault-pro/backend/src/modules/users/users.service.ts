@@ -205,12 +205,12 @@ export class UsersService {
   }
 
   async getDashboardStats(userId: string, role: Role) {
-    const where = role === Role.USER ? { userId } : {};
-
+    // Vault entries and expenses are private per-user — always scoped to the owner.
+    // Only the platform user count is role-aware (admin user-management feature).
     const [totalUsers, totalVaultEntries, totalExpenses] = await prisma.$transaction([
       prisma.user.count(role !== Role.USER ? undefined : { where: { id: userId } }),
-      prisma.vaultEntry.count({ where }),
-      prisma.expense.count({ where }),
+      prisma.vaultEntry.count({ where: { userId } }),
+      prisma.expense.count({ where: { userId } }),
     ]);
 
     return { totalUsers, totalVaultEntries, totalExpenses };

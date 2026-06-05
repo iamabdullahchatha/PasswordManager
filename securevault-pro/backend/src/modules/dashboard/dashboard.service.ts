@@ -4,8 +4,10 @@ import { Role } from '@prisma/client';
 export class DashboardService {
   async getStats(userId: string, role: Role) {
     const isAdmin = role !== Role.USER;
-    const expenseWhere = isAdmin ? {} : { userId };
-    const vaultWhere = isAdmin ? {} : { userId };
+    // Expenses and vault entries are private per-user data — never aggregated
+    // across users, even for admins. Only platform-level user counts respect role.
+    const expenseWhere = { userId };
+    const vaultWhere = { userId };
 
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -42,7 +44,7 @@ export class DashboardService {
         _sum: { amount: true },
       }),
       prisma.activityLog.findMany({
-        where: isAdmin ? {} : { userId },
+        where: { userId },
         include: { user: { select: { firstName: true, lastName: true, avatar: true } } },
         orderBy: { createdAt: 'desc' },
         take: 10,
@@ -83,8 +85,7 @@ export class DashboardService {
     };
   }
 
-  async getExpenseTrend(userId: string, role: Role, months = 6) {
-    const isAdmin = role !== Role.USER;
+  async getExpenseTrend(userId: string, _role: Role, months = 6) {
     const now = new Date();
     const result = [];
 
@@ -94,7 +95,7 @@ export class DashboardService {
 
       const agg = await prisma.expense.aggregate({
         where: {
-          ...(isAdmin ? {} : { userId }),
+          userId,
           date: { gte: start, lte: end },
         },
         _sum: { amount: true },

@@ -8,6 +8,7 @@ import { DollarSign, Tag, Calendar, RefreshCw, Store, FileText, CreditCard, Info
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { SelectMenu } from '../../components/ui/SelectMenu';
 import { expensesService } from '../../services/expenses.service';
 import { toast } from '../../hooks/useToast';
 import { getErrorMessage } from '../../services/api';
@@ -42,7 +43,6 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-const selectCls = 'w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm hover:border-slate-300';
 const labelCls  = 'block text-sm font-semibold text-slate-700 mb-1.5';
 
 export default function AddExpensePage() {
@@ -166,22 +166,23 @@ export default function AddExpensePage() {
                 required
                 {...register('amount')}
               />
-              <div>
-                <label className={labelCls}>Currency</label>
-                <select className={selectCls} {...register('currency')}>
-                  {currencies.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
+              <SelectMenu
+                label="Currency"
+                value={watch('currency') ?? 'USD'}
+                onChange={(v) => setValue('currency', v, { shouldValidate: true })}
+                options={currencies.map((c) => ({ value: c, label: c }))}
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className={labelCls}>Category <span className="text-red-500">*</span></label>
-                <select className={selectCls} {...register('category')}>
-                  {categories.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                </select>
-                {errors.category && <p className="text-xs text-red-600 mt-1">{errors.category.message}</p>}
-              </div>
+              <SelectMenu
+                label="Category"
+                required
+                value={category ?? ''}
+                onChange={(v) => setValue('category', v, { shouldValidate: true })}
+                options={categories.map(([v, l]) => ({ value: v, label: l }))}
+                error={errors.category?.message}
+              />
               <Input
                 label="Date"
                 type="date"
@@ -208,18 +209,18 @@ export default function AddExpensePage() {
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Payment Information</p>
 
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className={labelCls}><CreditCard size={13} className="inline mr-1" />Payment Method</label>
-                <select className={selectCls} {...register('paymentMethod')}>
-                  {paymentMethods.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className={labelCls}>Status</label>
-                <select className={selectCls} {...register('status')}>
-                  {statuses.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-                </select>
-              </div>
+              <SelectMenu
+                label={<><CreditCard size={13} className="inline mr-1" />Payment Method</>}
+                value={watch('paymentMethod') ?? 'CASH'}
+                onChange={(v) => setValue('paymentMethod', v, { shouldValidate: true })}
+                options={paymentMethods.map(([v, l]) => ({ value: v, label: l }))}
+              />
+              <SelectMenu
+                label="Status"
+                value={watch('status') ?? 'PAID'}
+                onChange={(v) => setValue('status', v, { shouldValidate: true })}
+                options={statuses.map((s) => ({ value: s.value, label: s.label }))}
+              />
             </div>
 
             <Input
@@ -284,13 +285,13 @@ export default function AddExpensePage() {
 
             {isRecurring && (
               <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-                <label className={labelCls}>Recurrence Period</label>
-                <select className={selectCls} {...register('recurringPeriod')}>
-                  <option value="">Select period</option>
-                  {(['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'] as const).map((p) => (
-                    <option key={p} value={p}>{p.charAt(0) + p.slice(1).toLowerCase()}</option>
-                  ))}
-                </select>
+                <SelectMenu
+                  label="Recurrence Period"
+                  placeholder="Select period"
+                  value={watch('recurringPeriod') ?? ''}
+                  onChange={(v) => setValue('recurringPeriod', v, { shouldValidate: true })}
+                  options={(['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'] as const).map((p) => ({ value: p, label: p.charAt(0) + p.slice(1).toLowerCase() }))}
+                />
               </motion.div>
             )}
           </div>

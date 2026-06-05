@@ -1,5 +1,6 @@
 import { forwardRef, ReactNode } from 'react';
 import { cn } from '../../utils/cn';
+import { SelectMenu } from './SelectMenu';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -102,53 +103,45 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 );
 Textarea.displayName = 'Textarea';
 
-/* ── Select ────────────────────────────────────────────────────────────────── */
-export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+/* ── Select ──────────────────────────────────────────────────────────────────
+ * Thin wrapper over the premium SelectMenu, kept for design-system parity.
+ * Controlled: pass `value` and `onChange(value)`. */
+export interface SelectProps {
   label?: string;
   hint?: string;
   error?: string;
   options: { value: string; label: string }[];
   placeholder?: string;
+  value: string;
+  onChange: (value: string) => void;
+  required?: boolean;
+  disabled?: boolean;
+  className?: string;
+  name?: string;
+  id?: string;
 }
 
-export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, hint, error, options, placeholder, className, required, ...props }, ref) => {
-    return (
-      <div className="space-y-1.5">
-        {label && (
-          <label className="block text-sm font-semibold text-slate-700">
-            {label}
-            {required && <span className="text-red-500 ml-1">*</span>}
-          </label>
-        )}
-        <select
-          ref={ref}
-          className={cn(
-            'w-full bg-white rounded-lg border text-sm text-slate-900',
-            'px-3 py-2.5 transition-all duration-150 appearance-none',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500',
-            'disabled:cursor-not-allowed disabled:bg-slate-50',
-            "bg-[url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E\")] bg-[length:20px] bg-[right_8px_center] bg-no-repeat pr-9",
-            error
-              ? 'border-red-400 focus:border-red-500'
-              : 'border-slate-200 hover:border-slate-300',
-            className,
-          )}
-          required={required}
-          {...props}
-        >
-          {placeholder && <option value="">{placeholder}</option>}
-          {options.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
-        {error && <p className="text-xs text-red-600">{error}</p>}
-        {hint && !error && <p className="text-xs text-slate-500">{hint}</p>}
-      </div>
-    );
-  },
-);
-Select.displayName = 'Select';
+export function Select({
+  label, hint, error, options, placeholder, value, onChange,
+  required, disabled, className, name, id,
+}: SelectProps) {
+  return (
+    <SelectMenu
+      label={label}
+      hint={hint}
+      error={error}
+      options={options}
+      placeholder={placeholder}
+      value={value}
+      onChange={onChange}
+      required={required}
+      disabled={disabled}
+      className={className}
+      name={name}
+      id={id}
+    />
+  );
+}
 
 /* ── Checkbox ──────────────────────────────────────────────────────────────── */
 export function Checkbox({

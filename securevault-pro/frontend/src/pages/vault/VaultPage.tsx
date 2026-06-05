@@ -13,6 +13,7 @@ import { Badge } from '../../components/ui/Badge';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { PageLoader } from '../../components/ui/LoadingSpinner';
 import { Modal } from '../../components/ui/Modal';
+import { SelectMenu } from '../../components/ui/SelectMenu';
 import { CopyButton } from '../../components/ui/CopyButton';
 import { vaultService, type VaultListParams } from '../../services/vault.service';
 import { useDebounce } from '../../hooks/useDebounce';
@@ -412,63 +413,68 @@ export default function VaultPage() {
                 {/* Provider */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Provider</label>
-                  <select
+                  <SelectMenu
+                    size="sm"
+                    ariaLabel="Filter by provider"
                     value={provider}
-                    onChange={(e) => setProvider(e.target.value as EmailProvider | '')}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                  >
-                    <option value="">All providers</option>
-                    {ALL_PROVIDERS.map((p) => (
-                      <option key={p} value={p}>{PROVIDER_LABELS[p]}</option>
-                    ))}
-                  </select>
+                    onChange={(v) => setProvider(v as EmailProvider | '')}
+                    options={[
+                      { value: '', label: 'All providers' },
+                      ...ALL_PROVIDERS.map((p) => ({ value: p, label: PROVIDER_LABELS[p] })),
+                    ]}
+                  />
                 </div>
 
                 {/* Importance */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Importance</label>
-                  <select
+                  <SelectMenu
+                    size="sm"
+                    ariaLabel="Filter by importance"
                     value={importance}
-                    onChange={(e) => setImportance(e.target.value as ImportanceLevel | '')}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                  >
-                    <option value="">All levels</option>
-                    {ALL_IMPORTANCE.map((l) => (
-                      <option key={l} value={l}>{l.charAt(0) + l.slice(1).toLowerCase()}</option>
-                    ))}
-                  </select>
+                    onChange={(v) => setImportance(v as ImportanceLevel | '')}
+                    options={[
+                      { value: '', label: 'All levels' },
+                      ...ALL_IMPORTANCE.map((l) => ({ value: l, label: l.charAt(0) + l.slice(1).toLowerCase() })),
+                    ]}
+                  />
                 </div>
 
                 {/* Health */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Password Health</label>
-                  <select
+                  <SelectMenu
+                    size="sm"
+                    ariaLabel="Filter by password health"
                     value={health}
-                    onChange={(e) => setHealth(e.target.value as 'weak' | 'old' | 'expiring' | '')}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                  >
-                    <option value="">All entries</option>
-                    <option value="weak">Weak passwords</option>
-                    <option value="old">Old (90+ days)</option>
-                    <option value="expiring">Expiring soon</option>
-                  </select>
+                    onChange={(v) => setHealth(v as 'weak' | 'old' | 'expiring' | '')}
+                    options={[
+                      { value: '', label: 'All entries' },
+                      { value: 'weak', label: 'Weak passwords' },
+                      { value: 'old', label: 'Old (90+ days)' },
+                      { value: 'expiring', label: 'Expiring soon' },
+                    ]}
+                  />
                 </div>
 
                 {/* Sort */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Sort by</label>
                   <div className="flex gap-2">
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value as VaultListParams['sortBy'])}
-                      className="flex-1 px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                    >
-                      <option value="updatedAt">Last updated</option>
-                      <option value="createdAt">Date added</option>
-                      <option value="title">Title</option>
-                      <option value="importanceLevel">Importance</option>
-                      <option value="lastAccessedAt">Last used</option>
-                    </select>
+                    <SelectMenu
+                      size="sm"
+                      className="flex-1"
+                      ariaLabel="Sort by"
+                      value={sortBy ?? 'updatedAt'}
+                      onChange={(v) => setSortBy(v as VaultListParams['sortBy'])}
+                      options={[
+                        { value: 'updatedAt', label: 'Last updated' },
+                        { value: 'createdAt', label: 'Date added' },
+                        { value: 'title', label: 'Title' },
+                        { value: 'importanceLevel', label: 'Importance' },
+                        { value: 'lastAccessedAt', label: 'Last used' },
+                      ]}
+                    />
                     <button
                       onClick={() => setSortOrder((p) => p === 'asc' ? 'desc' : 'asc')}
                       className="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-colors text-xs font-medium"

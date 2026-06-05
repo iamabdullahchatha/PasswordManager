@@ -3,8 +3,10 @@ import { Role, ExpenseCategory, PaymentMethod } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 
 export class ReportsService {
-  private buildWhere(userId: string, role: Role, extra: Prisma.ExpenseWhereInput = {}): Prisma.ExpenseWhereInput {
-    return role === Role.USER ? { userId, ...extra } : extra;
+  private buildWhere(userId: string, _role: Role, extra: Prisma.ExpenseWhereInput = {}): Prisma.ExpenseWhereInput {
+    // Financial data is strictly private: every report is scoped to the owner,
+    // regardless of role. No user (including admins) may see another user's expenses.
+    return { userId, ...extra };
   }
 
   async getMonthlyReport(userId: string, year: number, month: number, role: Role) {

@@ -6,6 +6,7 @@ import {
   CheckCircle2, Users, BookOpen, LayoutGrid, List, Sparkles, CalendarClock,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { SelectMenu } from '../../components/ui/SelectMenu';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -644,9 +645,12 @@ function EventFormModal({
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1.5"><Flag size={11} className="inline mr-1" />Priority</label>
-              <select value={form.priority} onChange={e => onChange('priority', e.target.value)} className={cn(inputCls, 'bg-white')}>
-                {(Object.keys(PRIORITY_CONFIG) as Priority[]).map(p => <option key={p} value={p}>{PRIORITY_CONFIG[p].label}</option>)}
-              </select>
+              <SelectMenu
+                ariaLabel="Priority"
+                value={form.priority}
+                onChange={(v) => onChange('priority', v)}
+                options={(Object.keys(PRIORITY_CONFIG) as Priority[]).map((p) => ({ value: p, label: PRIORITY_CONFIG[p].label, color: PRIORITY_CONFIG[p].color }))}
+              />
             </div>
           </div>
 
@@ -682,15 +686,21 @@ function EventFormModal({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1.5"><Bell size={11} className="inline mr-1" />Remind Me</label>
-              <select value={form.reminderBefore} onChange={e => onChange('reminderBefore', e.target.value)} className={cn(inputCls, 'bg-white')}>
-                {(Object.keys(REMINDER_LABELS) as ReminderBefore[]).map(r => <option key={r} value={r}>{REMINDER_LABELS[r]}</option>)}
-              </select>
+              <SelectMenu
+                ariaLabel="Reminder"
+                value={form.reminderBefore}
+                onChange={(v) => onChange('reminderBefore', v)}
+                options={(Object.keys(REMINDER_LABELS) as ReminderBefore[]).map((r) => ({ value: r, label: REMINDER_LABELS[r] }))}
+              />
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1.5"><Repeat size={11} className="inline mr-1" />Repeat</label>
-              <select value={form.repeat} onChange={e => onChange('repeat', e.target.value)} className={cn(inputCls, 'bg-white')}>
-                {(Object.keys(REPEAT_LABELS) as Repeat[]).map(r => <option key={r} value={r}>{REPEAT_LABELS[r]}</option>)}
-              </select>
+              <SelectMenu
+                ariaLabel="Repeat"
+                value={form.repeat}
+                onChange={(v) => onChange('repeat', v)}
+                options={(Object.keys(REPEAT_LABELS) as Repeat[]).map((r) => ({ value: r, label: REPEAT_LABELS[r] }))}
+              />
             </div>
           </div>
         </div>
