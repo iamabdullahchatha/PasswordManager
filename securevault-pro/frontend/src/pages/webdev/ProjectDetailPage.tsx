@@ -5,6 +5,7 @@ import {
   Briefcase, Edit2, Trash2, User, Mail, Phone, Building2,
   Globe, Link as LinkIcon, Calendar, DollarSign, TrendingUp, TrendingDown,
   ExternalLink, Globe2, Server, Check, ArrowLeft, Code, Clock,
+  ShoppingCart, AtSign,
 } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Button } from '../../components/ui/Button';
@@ -67,6 +68,9 @@ export default function ProjectDetailPage() {
       </div>
     );
   }
+
+  const purchasedDomains = project.purchasedDomains ?? [];
+  const purchasedEmails = project.purchasedEmails ?? [];
 
   const totalCost = calcTotalCost(project);
   const profit = calcProfit(project.clientCharged, totalCost);
@@ -336,6 +340,65 @@ export default function ProjectDetailPage() {
           </div>
         </motion.div>
       </div>
+
+      {/* Purchased domains & emails */}
+      {(purchasedDomains.length > 0 || purchasedEmails.length > 0) && (
+        <motion.div {...fade(7)} className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {/* Domains purchased */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-card p-5">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center">
+                <ShoppingCart size={15} className="text-blue-600" />
+              </div>
+              <h3 className="text-sm font-semibold text-slate-900">Domains Purchased ({purchasedDomains.length})</h3>
+            </div>
+            {purchasedDomains.length === 0 ? (
+              <p className="text-xs text-slate-400 italic">None recorded</p>
+            ) : (
+              <div className="space-y-2">
+                {purchasedDomains.map((d, i) => (
+                  <div key={i} className="flex items-center justify-between bg-slate-50 rounded-xl px-3 py-2 border border-slate-100 gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Globe size={13} className="text-slate-400 flex-shrink-0" />
+                      <p className="text-sm font-semibold text-slate-900 truncate">{d.name}</p>
+                    </div>
+                    {d.cost ? (
+                      <span className="text-xs font-semibold text-slate-600 whitespace-nowrap">{formatCurrency(d.cost, project.currency)}</span>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Emails purchased */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-card p-5">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-8 h-8 rounded-xl bg-indigo-100 flex items-center justify-center">
+                <AtSign size={15} className="text-indigo-600" />
+              </div>
+              <h3 className="text-sm font-semibold text-slate-900">Emails Purchased ({purchasedEmails.length})</h3>
+            </div>
+            {purchasedEmails.length === 0 ? (
+              <p className="text-xs text-slate-400 italic">None recorded</p>
+            ) : (
+              <div className="space-y-2">
+                {purchasedEmails.map((e, i) => (
+                  <div key={i} className="flex items-center justify-between bg-slate-50 rounded-xl px-3 py-2 border border-slate-100 gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <AtSign size={13} className="text-slate-400 flex-shrink-0" />
+                      <p className="text-sm font-semibold text-slate-900 truncate">{e.name}</p>
+                    </div>
+                    {e.cost ? (
+                      <span className="text-xs font-semibold text-slate-600 whitespace-nowrap">{formatCurrency(e.cost, project.currency)}</span>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </motion.div>
+      )}
 
       {/* Notes */}
       {project.notes && (

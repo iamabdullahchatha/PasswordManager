@@ -304,6 +304,12 @@ export interface WebEmailAccount {
   updatedAt: string;
 }
 
+// A domain/email purchased for a project, recorded directly on the project.
+export interface PurchasedItem {
+  name: string;       // domain name or email address
+  cost?: number;      // optional cost for this single item
+}
+
 export interface WebProject {
   id: string;
   name: string;
@@ -331,6 +337,8 @@ export interface WebProject {
   otherCost: number;
   domainIds: string[];
   emailIds: string[];
+  purchasedDomains: PurchasedItem[];
+  purchasedEmails: PurchasedItem[];
   startDate: string | null;
   endDate: string | null;
   notes: string | null;

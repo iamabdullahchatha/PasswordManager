@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import {
   Briefcase, User, Globe, Mail, DollarSign, Settings2,
   Link as LinkIcon, FileText, ChevronDown, ChevronUp, Check,
+  Plus, Trash2, AtSign, ShoppingCart,
 } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Button } from '../../components/ui/Button';
@@ -15,7 +16,7 @@ import {
 } from '../../utils/webdev';
 import { toast } from '../../hooks/useToast';
 import { cn } from '../../utils/cn';
-import type { ProjectStatus, ClientPaymentStatus, WebProjectService } from '../../types';
+import type { ProjectStatus, ClientPaymentStatus, WebProjectService, PurchasedItem } from '../../types';
 
 const STATUS_OPTIONS: { value: ProjectStatus; label: string }[] = [
   { value: 'ACTIVE', label: 'Active' },
@@ -60,6 +61,8 @@ const defaultForm = () => ({
   otherCost: '',
   domainIds: [] as string[],
   emailIds: [] as string[],
+  purchasedDomains: [] as PurchasedItem[],
+  purchasedEmails: [] as PurchasedItem[],
   notes: '',
   tags: '',
 });
@@ -94,6 +97,82 @@ function SectionCard({ title, icon: Icon, children, defaultOpen = true }: {
           {children}
         </div>
       )}
+    </div>
+  );
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function PurchasedListEditor({
+  title, items, placeholder, addLabel, icon: Icon, currency,
+  onAdd, onUpdate, onRemove,
+}: {
+  title: string;
+  items: PurchasedItem[];
+  placeholder: string;
+  addLabel: string;
+  icon: React.ComponentType<any>;
+  currency: string;
+  onAdd: () => void;
+  onUpdate: (idx: number, patch: Partial<PurchasedItem>) => void;
+  onRemove: (idx: number) => void;
+}) {
+  const totalCost = items.reduce((sum, it) => sum + (it.cost || 0), 0);
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+          {title} ({items.length})
+        </p>
+        {totalCost > 0 && (
+          <p className="text-xs font-semibold text-slate-600">
+            {totalCost.toLocaleString()} {currency}
+          </p>
+        )}
+      </div>
+
+      {items.length === 0 ? (
+        <p className="text-sm text-slate-400 italic mb-3">Nothing added yet.</p>
+      ) : (
+        <div className="space-y-2 mb-3">
+          {items.map((item, idx) => (
+            <div key={idx} className="flex items-center gap-2">
+              <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
+                <Icon size={13} className="text-slate-500" />
+              </div>
+              <input
+                type="text"
+                placeholder={placeholder}
+                value={item.name}
+                onChange={(e) => onUpdate(idx, { name: e.target.value })}
+                className="flex-1 min-w-0 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              />
+              <input
+                type="number"
+                placeholder="Cost"
+                value={item.cost ?? ''}
+                onChange={(e) => onUpdate(idx, { cost: e.target.value === '' ? undefined : Number(e.target.value) })}
+                className="w-24 flex-shrink-0 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              />
+              <button
+                type="button"
+                onClick={() => onRemove(idx)}
+                aria-label="Remove"
+                className="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+              >
+                <Trash2 size={15} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <button
+        type="button"
+        onClick={onAdd}
+        className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700 px-3 py-2 rounded-lg border-2 border-dashed border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors"
+      >
+        <Plus size={15} />{addLabel}
+      </button>
     </div>
   );
 }
@@ -142,6 +221,8 @@ export default function ProjectFormPage() {
       otherCost: String(project.otherCost),
       domainIds: project.domainIds,
       emailIds: project.emailIds,
+      purchasedDomains: project.purchasedDomains ?? [],
+      purchasedEmails: project.purchasedEmails ?? [],
       notes: project.notes ?? '',
       tags: project.tags.join(', '),
     });
@@ -170,6 +251,21 @@ export default function ProjectFormPage() {
       emailIds: p.emailIds.includes(eid) ? p.emailIds.filter((x) => x !== eid) : [...p.emailIds, eid],
     }));
   };
+
+  // ─── Purchased domains / emails (recorded directly on the project) ──────────
+  type PurchasedKey = 'purchasedDomains' | 'purchasedEmails';
+
+  const addPurchased = (key: PurchasedKey) =>
+    setForm((p) => ({ ...p, [key]: [...p[key], { name: '', cost: undefined }] }));
+
+  const updatePurchased = (key: PurchasedKey, idx: number, patch: Partial<PurchasedItem>) =>
+    setForm((p) => ({
+      ...p,
+      [key]: p[key].map((item, i) => (i === idx ? { ...item, ...patch } : item)),
+    }));
+
+  const removePurchased = (key: PurchasedKey, idx: number) =>
+    setForm((p) => ({ ...p, [key]: p[key].filter((_, i) => i !== idx) }));
 
   const n = (s: string) => (s.trim() === '' || isNaN(Number(s)) ? 0 : Number(s));
 
@@ -219,6 +315,12 @@ export default function ProjectFormPage() {
         otherCost: n(form.otherCost),
         domainIds: form.domainIds,
         emailIds: form.emailIds,
+        purchasedDomains: form.purchasedDomains
+          .map((d) => ({ name: d.name.trim(), cost: d.cost }))
+          .filter((d) => d.name !== ''),
+        purchasedEmails: form.purchasedEmails
+          .map((e) => ({ name: e.name.trim(), cost: e.cost }))
+          .filter((e) => e.name !== ''),
         notes: form.notes.trim() || null,
         tags: form.tags.split(',').map((s) => s.trim()).filter(Boolean),
       };
@@ -406,6 +508,38 @@ export default function ProjectFormPage() {
               </button>
             );
           })}
+        </div>
+      </SectionCard>
+
+      {/* Section 4b: Domains & Emails Purchased */}
+      <SectionCard title="Domains & Emails Purchased" icon={ShoppingCart}>
+        <p className="text-xs text-slate-500 mb-4">
+          Record each domain and email account you purchased for this client, with an optional cost per item.
+        </p>
+        <div className="space-y-6">
+          <PurchasedListEditor
+            title="Domains Purchased"
+            items={form.purchasedDomains}
+            placeholder="example.com"
+            addLabel="Add Domain"
+            icon={Globe}
+            currency={form.currency}
+            onAdd={() => addPurchased('purchasedDomains')}
+            onUpdate={(idx, patch) => updatePurchased('purchasedDomains', idx, patch)}
+            onRemove={(idx) => removePurchased('purchasedDomains', idx)}
+          />
+          <div className="border-t border-slate-100" />
+          <PurchasedListEditor
+            title="Emails Purchased"
+            items={form.purchasedEmails}
+            placeholder="info@example.com"
+            addLabel="Add Email"
+            icon={AtSign}
+            currency={form.currency}
+            onAdd={() => addPurchased('purchasedEmails')}
+            onUpdate={(idx, patch) => updatePurchased('purchasedEmails', idx, patch)}
+            onRemove={(idx) => removePurchased('purchasedEmails', idx)}
+          />
         </div>
       </SectionCard>
 
