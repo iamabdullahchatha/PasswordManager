@@ -71,6 +71,14 @@ import NotificationsPage from '../pages/NotificationsPage';
 // Calendar
 import CalendarPage from '../pages/calendar/CalendarPage';
 
+// Web Developer
+import WebDevDashboard from '../pages/webdev/WebDevDashboard';
+import DomainsPage from '../pages/webdev/DomainsPage';
+import EmailsPage from '../pages/webdev/EmailsPage';
+import ProjectsPage from '../pages/webdev/ProjectsPage';
+import ProjectFormPage from '../pages/webdev/ProjectFormPage';
+import ProjectDetailPage from '../pages/webdev/ProjectDetailPage';
+
 export const router = createBrowserRouter([
   { path: '/login',           element: <LoginPage />,          errorElement: <RouteErrorBoundary /> },
   { path: '/register',        element: <RegisterPage />,       errorElement: <RouteErrorBoundary /> },
@@ -123,6 +131,15 @@ export const router = createBrowserRouter([
 
       // ── Calendar ───────────────────────────────────────────────────────
       { path: 'calendar', element: <CalendarPage /> },
+
+      // ── Web Developer ──────────────────────────────────────────────────────
+      { path: 'webdev',                   element: <WebDevDashboard /> },
+      { path: 'webdev/domains',           element: <DomainsPage /> },
+      { path: 'webdev/emails',            element: <EmailsPage /> },
+      { path: 'webdev/projects',          element: <ProjectsPage /> },
+      { path: 'webdev/projects/new',      element: <ProjectFormPage /> },
+      { path: 'webdev/projects/:id',      element: <ProjectDetailPage /> },
+      { path: 'webdev/projects/:id/edit', element: <ProjectFormPage /> },
 
       // ── Logs / Notifications ───────────────────────────────────────────
       { path: 'activity-logs', element: <ActivityLogsPage /> },

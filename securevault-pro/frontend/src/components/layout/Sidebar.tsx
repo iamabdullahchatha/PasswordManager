@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Shield, DollarSign, BarChart3, Users,
   Activity, Key, Lock, LogOut, ChevronLeft,
   ChevronRight, ChevronDown, Wallet, FileText, Plus,
-  UserCog, ShieldAlert, Target, Calendar,
+  UserCog, ShieldAlert, Target, Calendar, Globe, Briefcase, Mail,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuthStore } from '../../store/authStore';
@@ -48,6 +48,17 @@ const NAV: NavItem[] = [
   },
   { label: 'Reports', href: '/reports', icon: FileText },
   { label: 'Calendar', href: '/calendar', icon: Calendar },
+  {
+    label: 'Web Developer',
+    href: '/webdev',
+    icon: Globe,
+    children: [
+      { label: 'Dashboard',     href: '/webdev',          icon: Globe     },
+      { label: 'Domains',       href: '/webdev/domains',  icon: Globe     },
+      { label: 'Email Hosting', href: '/webdev/emails',   icon: Mail      },
+      { label: 'Projects',      href: '/webdev/projects', icon: Briefcase },
+    ],
+  },
   { label: 'Users', href: '/users', icon: Users, roles: ['ADMIN', 'SUPER_ADMIN'] },
   { label: 'Activity Logs', href: '/activity-logs', icon: Activity },
 ];
@@ -70,7 +81,7 @@ export function Sidebar({ collapsed, onToggle, hideToggle = false }: SidebarProp
   const { user, refreshToken, logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
-  const [expanded, setExpanded] = useState<string[]>(['Password Vault', 'Expenses']);
+  const [expanded, setExpanded] = useState<string[]>(['Password Vault', 'Expenses', 'Web Developer']);
 
   const canSee = (item: NavItem) => {
     if (!item.roles) return true;

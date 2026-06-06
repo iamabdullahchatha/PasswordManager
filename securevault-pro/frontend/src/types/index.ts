@@ -245,6 +245,100 @@ export interface ExpenseTrend {
   count: number;
 }
 
+// ─── Web Developer ────────────────────────────────────────────────────────────
+
+export type DomainRegistrar =
+  | 'GODADDY' | 'NAMECHEAP' | 'CLOUDFLARE' | 'GOOGLE_DOMAINS'
+  | 'AWS_ROUTE53' | 'PORKBUN' | 'HOVER' | 'NAMESILO' | 'DYNADOT'
+  | 'RESELLER_CLUB' | 'ENOM' | 'NETWORK_SOLUTIONS' | 'BLUEHOST'
+  | 'HOSTINGER' | 'SITEGROUND' | 'OTHER';
+
+export type EmailHostProvider =
+  | 'GOOGLE_WORKSPACE' | 'MICROSOFT_365' | 'ZOHO_MAIL' | 'NAMECHEAP_EMAIL'
+  | 'CPANEL' | 'PROTONMAIL_BUSINESS' | 'FASTMAIL' | 'RACKSPACE' | 'TITAN_EMAIL' | 'OTHER';
+
+export type ProjectStatus = 'ACTIVE' | 'COMPLETED' | 'PAUSED' | 'ON_HOLD' | 'CANCELLED';
+
+export type ClientPaymentStatus = 'PAID' | 'PARTIAL' | 'PENDING' | 'OVERDUE';
+
+export type WebProjectService =
+  | 'DOMAIN' | 'EMAIL_HOSTING' | 'WEB_HOSTING' | 'WEBSITE_DESIGN'
+  | 'WEBSITE_DEVELOPMENT' | 'SEO' | 'MAINTENANCE' | 'SOCIAL_MEDIA'
+  | 'LOGO_DESIGN' | 'BRANDING' | 'CONTENT_WRITING' | 'E_COMMERCE' | 'CUSTOM';
+
+export interface WebDomain {
+  id: string;
+  name: string;
+  registrar: DomainRegistrar;
+  registrarUrl: string | null;
+  purchaseDate: string;
+  expiryDate: string;
+  autoRenew: boolean;
+  costPerYear: number;
+  currency: string;
+  projectId: string | null;
+  notes: string | null;
+  tags: string[];
+  nameservers: string[];
+  isPrivacyEnabled: boolean;
+  isDnsManaged: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WebEmailAccount {
+  id: string;
+  emailAddress: string;
+  domainName: string;
+  provider: EmailHostProvider;
+  plan: string | null;
+  purchaseDate: string;
+  expiryDate: string | null;
+  seats: number;
+  costPerYear: number;
+  currency: string;
+  projectId: string | null;
+  isActive: boolean;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WebProject {
+  id: string;
+  name: string;
+  description: string | null;
+  clientName: string;
+  clientEmail: string | null;
+  clientPhone: string | null;
+  clientCompany: string | null;
+  status: ProjectStatus;
+  services: WebProjectService[];
+  liveUrl: string | null;
+  stagingUrl: string | null;
+  repositoryUrl: string | null;
+  clientCharged: number;
+  currency: string;
+  paymentStatus: ClientPaymentStatus;
+  invoiceDate: string | null;
+  dueDate: string | null;
+  domainCost: number;
+  emailCost: number;
+  hostingCost: number;
+  designCost: number;
+  developmentCost: number;
+  maintenanceCost: number;
+  otherCost: number;
+  domainIds: string[];
+  emailIds: string[];
+  startDate: string | null;
+  endDate: string | null;
+  notes: string | null;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ─── Reports ──────────────────────────────────────────────────────────────────
 
 export interface CategoryReportData {
