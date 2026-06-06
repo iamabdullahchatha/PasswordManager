@@ -139,6 +139,8 @@ export default function ProjectsPage() {
             const isProfit = profit >= 0;
             const linkedDomains = domains.filter((d) => project.domainIds.includes(d.id));
             const linkedEmails = emailAccounts.filter((e) => project.emailIds.includes(e.id));
+            const domainCount = linkedDomains.length + (project.purchasedDomains?.length ?? 0);
+            const emailCount = linkedEmails.length + (project.purchasedEmails?.length ?? 0);
 
             return (
               <motion.div
@@ -211,10 +213,10 @@ export default function ProjectsPage() {
                   {/* Resources */}
                   <div className="flex items-center gap-3">
                     <span className="inline-flex items-center gap-1 text-xs text-slate-500">
-                      <Globe size={11} />{linkedDomains.length} domain{linkedDomains.length !== 1 ? 's' : ''}
+                      <Globe size={11} />{domainCount} domain{domainCount !== 1 ? 's' : ''}
                     </span>
                     <span className="inline-flex items-center gap-1 text-xs text-slate-500">
-                      <Mail size={11} />{linkedEmails.length} email{linkedEmails.length !== 1 ? 's' : ''}
+                      <Mail size={11} />{emailCount} email{emailCount !== 1 ? 's' : ''}
                     </span>
                   </div>
                 </div>
